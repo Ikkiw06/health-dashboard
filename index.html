@@ -287,6 +287,77 @@ main{max-width:1440px;margin:0 auto;padding:22px 22px 44px}
 }
 
 /* ══════════════════════════════════════
+   AI SECTION
+══════════════════════════════════════ */
+.ai-box{
+  background:var(--card);border:1px solid var(--bdr2);border-radius:16px;
+  padding:22px;margin-bottom:22px;backdrop-filter:blur(12px);
+  box-shadow:var(--sh2);animation:fadeUp .6s ease backwards;
+  transition:background .4s,border-color .4s;
+  position:relative;overflow:hidden;
+}
+.ai-box::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(176,111,255,.05) 0%,rgba(79,142,247,.05) 100%);
+  pointer-events:none;
+}
+.ai-top{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.ai-meta{flex:1}
+.ai-title{font-size:15px;font-weight:800;color:var(--txt);margin-bottom:4px;transition:color .4s}
+.ai-sub{font-size:11px;color:var(--muted);margin-bottom:14px;line-height:1.5}
+.ai-key-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.ai-input{
+  flex:1;min-width:200px;
+  background:var(--card2);border:1px solid var(--bdr2);
+  color:var(--txt);border-radius:9px;padding:9px 13px;
+  font-size:12px;outline:none;transition:border-color .2s,background .4s;
+  font-family:inherit;
+}
+.ai-input:focus{border-color:var(--purple)}
+.ai-input::placeholder{color:var(--muted)}
+.ai-run{
+  background:linear-gradient(135deg,#7c3aed,var(--purple));
+  border:none;color:#fff;padding:9px 18px;border-radius:9px;
+  font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;
+  transition:opacity .2s,transform .15s;box-shadow:0 3px 14px rgba(176,111,255,.4);
+  font-family:inherit;
+}
+.ai-run:hover{opacity:.88;transform:translateY(-1px)}
+.ai-run:disabled{opacity:.45;cursor:not-allowed;transform:none}
+.ai-hint{font-size:10px;color:var(--muted);margin-top:6px}
+.ai-hint a{color:var(--purple);text-decoration:none}
+
+/* loading dots */
+.ai-loading{display:none;align-items:center;gap:10px;padding:18px 0;color:var(--muted);font-size:13px}
+.ai-loading.show{display:flex}
+.dot3{display:flex;gap:5px}
+.dot3 span{width:7px;height:7px;border-radius:50%;background:var(--purple);animation:pulse 1.2s ease-in-out infinite}
+.dot3 span:nth-child(2){animation-delay:.2s}
+.dot3 span:nth-child(3){animation-delay:.4s}
+
+/* result cards */
+.ai-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;margin-top:18px}
+.ai-card{
+  background:var(--card2);border:1px solid var(--bdr);border-radius:12px;
+  padding:14px 16px;animation:fadeUp .4s ease backwards;
+  transition:background .4s,border-color .4s;
+}
+.ai-card-h{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.ai-card-ico{font-size:20px}
+.ai-card-t{font-size:12px;font-weight:800;color:var(--txt);transition:color .4s}
+.ai-card-body{font-size:12px;color:var(--txt2);line-height:1.7;transition:color .4s}
+.ai-card-body ul{padding-left:16px}
+.ai-card-body li{margin-bottom:4px}
+.ai-err{color:var(--rose);font-size:12px;margin-top:10px;padding:10px 14px;
+  background:rgba(255,85,119,.08);border-radius:8px;border:1px solid rgba(255,85,119,.2)}
+.ai-rerun{
+  background:var(--golddim);border:1px solid var(--gold);color:var(--gold);
+  padding:6px 14px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;
+  margin-top:12px;transition:background .2s;font-family:inherit;
+}
+.ai-rerun:hover{background:rgba(200,168,69,.25)}
+
+/* ══════════════════════════════════════
    FOOTER
 ══════════════════════════════════════ */
 footer{text-align:center;padding:14px 0 0;font-size:11px;color:var(--muted);border-top:1px solid var(--bdr);transition:color .4s,border-color .4s}
@@ -375,6 +446,14 @@ footer{text-align:center;padding:14px 0 0;font-size:11px;color:var(--muted);bord
   }
   .bottom-bar::-webkit-scrollbar{display:none}
   .bottom-bar .pbtn{flex-shrink:0;padding:8px 14px;font-size:12px}
+}
+
+/* AI mobile */
+@media(max-width:768px){
+  .ai-cards{grid-template-columns:1fr}
+  .ai-key-row{flex-direction:column;align-items:stretch}
+  .ai-run{width:100%;padding:11px}
+  .ai-input{min-width:unset}
 }
 
 /* ── Small phone ── */
@@ -524,6 +603,27 @@ footer{text-align:center;padding:14px 0 0;font-size:11px;color:var(--muted);bord
     <div class="mt">สรุปข้อมูล</div><div class="ms">Summary Statistics</div>
     <div style="display:flex;flex-direction:column;gap:7px" id="sumlist"></div>
   </div>
+</div>
+
+<!-- AI SECTION -->
+<div class="shdr" style="animation-delay:.22s"><h2>🤖 AI แนะนำกิจกรรม</h2><div class="shdr-line"></div></div>
+<div class="ai-box" style="animation-delay:.24s">
+  <div class="ai-top">
+    <div class="ai-meta">
+      <div class="ai-title">✨ วิเคราะห์ข้อมูลสุขภาพด้วย AI</div>
+      <div class="ai-sub">ระบบจะนำข้อมูลอาการ ยา และพฤติกรรมการมาใช้บริการในช่วงที่เลือก<br>ส่งให้ AI วิเคราะห์และแนะนำกิจกรรมที่เหมาะสมกับพนักงาน</div>
+      <div class="ai-key-row">
+        <input class="ai-input" type="password" id="ai-key" placeholder="🔑 Google Gemini API Key"/>
+        <button class="ai-run" id="ai-run-btn" onclick="runAI()">✨ วิเคราะห์เลย</button>
+      </div>
+      <div class="ai-hint">รับ API Key ฟรีได้ที่ <a href="https://aistudio.google.com/app/apikey" target="_blank">aistudio.google.com</a> (ไม่ต้องใส่บัตรเครดิต)</div>
+    </div>
+  </div>
+  <div class="ai-loading" id="ai-loading">
+    <div class="dot3"><span></span><span></span><span></span></div>
+    <span>AI กำลังวิเคราะห์ข้อมูลสุขภาพ…</span>
+  </div>
+  <div id="ai-result"></div>
 </div>
 
 <!-- MOBILE BOTTOM BAR (quick period filter) -->
@@ -714,100 +814,4 @@ function renderEmpty(){
 /* ══════════════════════════════════════
    CHARTS
 ══════════════════════════════════════ */
-function gc(){return{grid:isDark?'rgba(255,255,255,0.05)':'rgba(0,0,0,0.05)',tick:isDark?'#4a6070':'#607080',leg:isDark?'#7a9ab8':'#505060',tip:{bg:isDark?'#081224':'#fff',t:isDark?'#e8f0fe':'#0d1a2d',b:isDark?'#7a9ab8':'#607080'}};}
-
-function renderBar(labels,data){
-  const ctx=document.getElementById('cbar');if(!ctx)return;
-  if(mChart)mChart.destroy();
-  const c=gc(),mx=data.indexOf(Math.max(...data));
-  mChart=new Chart(ctx,{type:'bar',
-    data:{labels,datasets:[{label:'ครั้ง',data,
-      backgroundColor:data.map((_,i)=>i===mx?'rgba(200,168,69,.85)':'rgba(79,142,247,.4)'),
-      borderColor:    data.map((_,i)=>i===mx?'#c8a845':'#4f8ef7'),
-      borderWidth:1.5,borderRadius:7,borderSkipped:false}]},
-    options:{responsive:true,maintainAspectRatio:false,animation:{duration:900,easing:'easeOutQuart'},
-      plugins:{legend:{display:false},tooltip:{backgroundColor:c.tip.bg,titleColor:c.tip.t,bodyColor:c.tip.b,borderColor:'rgba(200,168,69,.3)',borderWidth:1,padding:10,cornerRadius:8}},
-      scales:{x:{grid:{color:c.grid},ticks:{color:c.tick,font:{size:12,weight:'600'}}},
-              y:{grid:{color:c.grid},ticks:{color:c.tick,font:{size:11}}}}}});
-}
-function renderDonut(labels,data){
-  const ctx=document.getElementById('cdonut');if(!ctx)return;
-  if(dChart)dChart.destroy();
-  const c=gc(),cols=['#c8a845','#4f8ef7','#18c3ad','#b06fff','#ff8c40'];
-  dChart=new Chart(ctx,{type:'doughnut',
-    data:{labels,datasets:[{data,backgroundColor:cols.map(x=>x+'cc'),borderColor:cols,borderWidth:2,hoverOffset:10}]},
-    options:{responsive:true,maintainAspectRatio:false,animation:{duration:900,easing:'easeOutQuart'},cutout:'64%',
-      plugins:{legend:{position:'bottom',labels:{color:c.leg,font:{size:10,weight:'600'},padding:10,boxWidth:10,usePointStyle:true,pointStyle:'circle'}},
-        tooltip:{backgroundColor:c.tip.bg,titleColor:c.tip.t,bodyColor:c.tip.b,borderColor:'rgba(200,168,69,.3)',borderWidth:1,padding:10,cornerRadius:8}}}});
-}
-
-/* ══════════════════════════════════════
-   DATA LOADING (ลองโหลด Google Sheets ก่อน)
-══════════════════════════════════════ */
-function setStatus(state,txt){document.getElementById('dot').className='dot '+state;$t('stxt',txt);}
-
-async function loadData(){
-  const rico=document.getElementById('rico');rico.className='spin go';
-  document.getElementById('ov').classList.add('show');
-  setStatus('loading','กำลังโหลด…');
-  let ok=false;
-  try{
-    const res=await fetch(CSV_URL,{cache:'no-cache',signal:AbortSignal.timeout(6000)});
-    if(res.ok){
-      const txt=await res.text();
-      if(txt&&txt.length>200&&txt.includes(',')){
-        const rows=parseCSV(txt);
-        if(rows.length>10){
-          injectLiveData(rows);
-          setStatus('ok',`Google Sheets — ${rows.length.toLocaleString()} รายการ`);
-          SRC='live';ok=true;
-        }
-      }
-    }
-  }catch(e){}
-  if(!ok){
-    setStatus('ok','ข้อมูลจริง 1,481 รายการ (ม.ค.–มิ.ย. 2568)');
-    SRC='embedded';
-  }
-  const badge=document.getElementById('srcbadge');
-  if(badge) badge.innerHTML=`<span class="src-badge">✓ ${SRC==='live'?'ข้อมูลสด Google Sheets':'ข้อมูลจริง ม.ค.–มิ.ย. 2568'}</span>`;
-  render(getData());
-  rico.className='spin';
-  document.getElementById('ov').classList.remove('show');
-}
-
-/* ══════════════════════════════════════
-   LIVE CSV PARSER
-══════════════════════════════════════ */
-function parseCSV(text){
-  const lines=text.trim().split(/\r?\n/);
-  let start=1;
-  for(let i=0;i<Math.min(lines.length,5);i++){const c=sl(lines[i]);if(c[0]&&/^\d+$/.test(c[0].trim())){start=i;break;}}
-  const byMonth={};
-  for(let i=start;i<lines.length;i++){
-    const c=sl(lines[i]);
-    if(c.length<5||!/^\d+$/.test((c[0]||'').trim())) continue;
-    const gender=(c[3]||'').trim();if(!['M','F'].includes(gender.toUpperCase())&&!gender) continue;
-    const m=nm(c[6]);if(!m)continue;
-    if(!byMonth[m]) byMonth[m]={total:0,uniq:new Set(),sym:{},med:{},grp:{},time:{},gender:{},area:{}};
-    const d=byMonth[m];
-    d.total++;
-    const id=(c[1]||'').trim();if(id)d.uniq.add(id);
-    function add(o,v){if(v)o[v]=(o[v]||0)+1;}
-    add(d.gender,gender.toUpperCase()==='M'?'M':'F');
-    add(d.area,(c[5]||'').trim());
-    add(d.time,nt(c[7]));add(d.sym,ns(c[8]));add(d.med,(c[9]||'').trim().toUpperCase());add(d.grp,ng(c[10]));
-  }
-  // Build into RD format and inject
-  const months=Object.keys(byMonth);
-  for(const m of months){
-    const d=byMonth[m];
-    const s2a=(o,n=10)=>Object.entries(o).sort((a,b)=>b[1]-a[1]).slice(0,n).map(([k,v])=>[k,v]);
-    RD[m]={total:d.total,uniq:d.uniq.size,sym:s2a(d.sym),med:s2a(d.med),grp:s2a(d.grp),time:s2a(d.time,4),gender:d.gender,area:s2a(d.area,5)};
-  }
-  // Recompute __all__
-  const allMonths=Object.keys(RD).filter(k=>k!=='__all__');
-  const all=aggMonths(allMonths);if(all) RD['__all__']={...all,uniq:new Set(months.flatMap(m=>[])).size||all.uniq};
-  return months.flatMap(m=>Array(byMonth[m].total).fill(m));
-}
-function injectLiveData(rows){/*
+function gc(){return{grid:isDark?'rgba(255,255,255,0.05)':'rgba(0,0,0,0.05)',tick:isDark?'#4a6070':'#607080',leg:isDark?'#7a9ab8':'#505060',tip:{bg:isDark?'#081224':'#fff',t:isDark?'#e8f0fe':'#0d1a2d',b:isDark?'#7a9ab8':'#607080'}};
