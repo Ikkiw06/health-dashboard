@@ -2,7 +2,11 @@
 <html lang="th" data-theme="dark">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="theme-color" content="#030912"/>
 <title>Health Room Analytics</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
@@ -290,8 +294,96 @@ footer{text-align:center;padding:14px 0 0;font-size:11px;color:var(--muted);bord
 /* ══════════════════════════════════════
    RESPONSIVE
 ══════════════════════════════════════ */
-@media(max-width:1200px){.t5g{grid-template-columns:repeat(2,1fr)}.chrow{grid-template-columns:1fr}.kgrid{grid-template-columns:repeat(3,1fr)}}
-@media(max-width:768px){main{padding:14px 12px 32px}.t5g,.brow{grid-template-columns:1fr}.kgrid{grid-template-columns:repeat(2,1fr)}header{padding:0 14px}.ht{font-size:12px}}
+@media(max-width:1200px){
+  .t5g{grid-template-columns:repeat(2,1fr)}
+  .chrow{grid-template-columns:1fr}
+  .kgrid{grid-template-columns:repeat(3,1fr)}
+}
+
+/* ── Tablet ── */
+@media(max-width:900px){
+  .kgrid{grid-template-columns:repeat(3,1fr)}
+  .brow{grid-template-columns:repeat(2,1fr)}
+}
+
+/* ── Mobile ── */
+@media(max-width:768px){
+  /* header compact */
+  header{padding:0 12px;height:56px}
+  .ht{font-size:12px;line-height:1.2}
+  .hs{display:none}
+  #sbadge{display:none}
+  .hbtn span:last-child{display:none}
+  .hbtn{padding:6px 10px;font-size:13px}
+  .logo{width:32px;height:32px;font-size:15px;border-radius:8px}
+
+  /* main */
+  main{padding:12px 10px 80px}
+
+  /* filter: horizontal scroll rows */
+  .fbox{padding:10px 12px;border-radius:12px}
+  .frow{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;gap:7px;
+    padding-bottom:4px;scrollbar-width:none}
+  .frow::-webkit-scrollbar{display:none}
+  .frow+.frow{margin-top:8px;padding-top:8px}
+  .flbl{display:none}
+  .pbtn,.mbtn{flex-shrink:0;padding:7px 14px;font-size:12px;border-radius:8px}
+  .pbtn.on{padding:7px 14px}
+
+  /* KPI: 2 cols */
+  .kgrid{grid-template-columns:repeat(2,1fr);gap:9px}
+  .kcard{padding:14px 12px;border-radius:12px}
+  .ki{font-size:20px;margin-bottom:7px}
+  .kv{font-size:22px}
+  .kl{font-size:9px}
+  .ks{font-size:10px}
+
+  /* section header */
+  .shdr{margin:16px 0 10px}
+  .shdr h2{font-size:12px}
+
+  /* top 5: 1 col */
+  .t5g{grid-template-columns:1fr;gap:10px}
+  .t5{padding:14px;border-radius:12px}
+
+  /* charts stacked */
+  .chrow{grid-template-columns:1fr;gap:10px}
+  .chcard{padding:14px;border-radius:12px}
+  .chw{height:180px!important}
+
+  /* bottom row: 1 col */
+  .brow{grid-template-columns:1fr;gap:10px}
+  .mini{padding:14px;border-radius:12px}
+
+  /* rank items larger touch */
+  .ri{margin-bottom:11px}
+  .rb{width:24px;height:24px;font-size:11px}
+  .rn{font-size:12px}
+  .rc{font-size:12px}
+
+  /* footer */
+  footer{padding:10px 0}
+
+  /* sticky bottom bar for quick filter */
+  .bottom-bar{
+    display:flex;position:fixed;bottom:0;left:0;right:0;z-index:150;
+    background:var(--card);border-top:1px solid var(--bdr2);
+    backdrop-filter:blur(16px);padding:8px 10px 10px;
+    gap:6px;overflow-x:auto;-webkit-overflow-scrolling:touch;
+    box-shadow:0 -4px 20px rgba(0,0,0,0.3);
+    scrollbar-width:none;
+  }
+  .bottom-bar::-webkit-scrollbar{display:none}
+  .bottom-bar .pbtn{flex-shrink:0;padding:8px 14px;font-size:12px}
+}
+
+/* ── Small phone ── */
+@media(max-width:400px){
+  .kgrid{grid-template-columns:1fr}
+  .kcard{padding:12px 10px}
+  .kv{font-size:20px}
+  .hbtn{padding:5px 8px}
+}
 </style>
 </head>
 <body>
@@ -432,6 +524,15 @@ footer{text-align:center;padding:14px 0 0;font-size:11px;color:var(--muted);bord
     <div class="mt">สรุปข้อมูล</div><div class="ms">Summary Statistics</div>
     <div style="display:flex;flex-direction:column;gap:7px" id="sumlist"></div>
   </div>
+</div>
+
+<!-- MOBILE BOTTOM BAR (quick period filter) -->
+<div class="bottom-bar" id="mobb">
+  <button class="pbtn on" onclick="setFM('all',this)">ทั้งหมด</button>
+  <button class="pbtn"    onclick="setFM('1m',this)">1 เดือน</button>
+  <button class="pbtn"    onclick="setFM('3m',this)">3 เดือน</button>
+  <button class="pbtn"    onclick="setFM('6m',this)">6 เดือน</button>
+  <button class="pbtn"    onclick="setFM('12m',this)">12 เดือน</button>
 </div>
 
 <footer>
@@ -709,14 +810,4 @@ function parseCSV(text){
   const all=aggMonths(allMonths);if(all) RD['__all__']={...all,uniq:new Set(months.flatMap(m=>[])).size||all.uniq};
   return months.flatMap(m=>Array(byMonth[m].total).fill(m));
 }
-function injectLiveData(rows){/* already injected in parseCSV */}
-function sl(line){const r=[];let cur='',q=false;for(let i=0;i<line.length;i++){const ch=line[i];if(ch==='"'){if(q&&line[i+1]==='"'){cur+='"';i++;}else q=!q;}else if(ch===','&&!q){r.push(cur);cur='';}else cur+=ch;}r.push(cur);return r;}
-function nm(m){return({'กุมาพันธ์':'กุมภาพันธ์','กุมาพันธ':'กุมภาพันธ์'})[m?.trim()]||m?.trim()||'';}
-function nt(t){t=(t||'').trim();if(/06|เช้า/.test(t))return'ช่วงเช้า (06:00–11:59)';if(/12:0|เที่ยง/.test(t))return'ช่วงเที่ยง (12:00–12:59)';if(/13|บ่าย/.test(t))return'ช่วงบ่าย (13:00–15:59)';if(/16|เย็น/.test(t))return'ช่วงเย็น (16:00–17:59)';return t;}
-function ns(s){s=(s||'').trim();if(/ปวดศร|ปวดศีร/.test(s))return'ปวดศีรษะ';if(/ปวดกล้ามเนื้อ|ปวดหลัง|ปวดขา/.test(s))return'ปวดกล้ามเนื้อ/ปวดหลัง';if(/จุกแน่นท้อง|ท้องอืด|แน่นท้อง/.test(s))return'ท้องอืด/แน่นท้อง';if(/ถ่ายเหลว|ปวดบิดท้อง|ท้องเสีย/.test(s))return'ถ่ายเหลว/ปวดบิดท้อง';if(/ไอ|เจ็บคอ/.test(s))return'ไอ/เจ็บคอ';if(/คัดจมูก|แน่นจมูก|น้ำมูก/.test(s))return'คัดจมูก/น้ำมูกไหล';if(/ผื่|ลมพิษ/.test(s))return'ผื่นคัน/ลมพิษ';if(/แผล|ถลอก/.test(s))return'แผลถลอก/แผลสด';if(/ประจำเดือน/.test(s))return'ปวดท้องประจำเดือน';if(/เวียนศ|มึนเวียน/.test(s))return'เวียนศีรษะ';return s;}
-function ng(g){g=(g||'').trim();if(/แก้ปวด|ลดไข้|ต้านการอักเสบ/.test(g))return'กลุ่มแก้ปวด/ลดไข้';if(/ทางเดินหายใจ|หวัด|แก้แพ้/.test(g))return'กลุ่มระบบทางเดินหายใจ';if(/ทางเดินอาหาร/.test(g))return'กลุ่มระบบทางเดินอาหาร';if(/ภายนอก|ผิวหนัง|แผลเฉพาะ/.test(g))return'กลุ่มยาใช้ภายนอก';if(/ปฐมพยาบาล|เวชภัณฑ์/.test(g))return'อุปกรณ์ปฐมพยาบาล';if(/เวียนศีรษะ|เมารถ/.test(g))return'กลุ่มแก้เวียนศีรษะ';if(/ยาตา|ดวงตา/.test(g))return'กลุ่มยาตา';if(/ฆ่าเชื้อ/.test(g))return'กลุ่มยาฆ่าเชื้อ';return g;}
-
-window.addEventListener('load',loadData);
-</script>
-</body>
-</html>
+function injectLiveData(rows){/*
