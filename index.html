@@ -610,18 +610,16 @@ footer{text-align:center;padding:14px 0 0;font-size:11px;color:var(--muted);bord
 <div class="ai-box" style="animation-delay:.24s">
   <div class="ai-top">
     <div class="ai-meta">
-      <div class="ai-title">✨ วิเคราะห์ข้อมูลสุขภาพด้วย AI</div>
-      <div class="ai-sub">ระบบจะนำข้อมูลอาการ ยา และพฤติกรรมการมาใช้บริการในช่วงที่เลือก<br>ส่งให้ AI วิเคราะห์และแนะนำกิจกรรมที่เหมาะสมกับพนักงาน</div>
+      <div class="ai-title">✨ วิเคราะห์สุขภาพพนักงานอัตโนมัติ</div>
+      <div class="ai-sub">ระบบวิเคราะห์อาการ ยา และพฤติกรรมการมาใช้บริการในช่วงที่เลือก<br>แล้วแนะนำกิจกรรมและโปรแกรมสุขภาพที่เหมาะสม</div>
       <div class="ai-key-row">
-        <input class="ai-input" type="password" id="ai-key" placeholder="🔑 Google Gemini API Key"/>
-        <button class="ai-run" id="ai-run-btn" onclick="runAI()">✨ วิเคราะห์เลย</button>
+        <button class="ai-run" id="ai-run-btn" onclick="runAI()">🔍 วิเคราะห์และแนะนำกิจกรรม</button>
       </div>
-      <div class="ai-hint">รับ API Key ฟรีได้ที่ <a href="https://aistudio.google.com/app/apikey" target="_blank">aistudio.google.com</a> (ไม่ต้องใส่บัตรเครดิต)</div>
     </div>
   </div>
   <div class="ai-loading" id="ai-loading">
     <div class="dot3"><span></span><span></span><span></span></div>
-    <span>AI กำลังวิเคราะห์ข้อมูลสุขภาพ…</span>
+    <span>กำลังวิเคราะห์ข้อมูลสุขภาพ…</span>
   </div>
   <div id="ai-result"></div>
 </div>
@@ -814,4 +812,292 @@ function renderEmpty(){
 /* ══════════════════════════════════════
    CHARTS
 ══════════════════════════════════════ */
-function gc(){return{grid:isDark?'rgba(255,255,255,0.05)':'rgba(0,0,0,0.05)',tick:isDark?'#4a6070':'#607080',leg:isDark?'#7a9ab8':'#505060',tip:{bg:isDark?'#081224':'#fff',t:isDark?'#e8f0fe':'#0d1a2d',b:isDark?'#7a9ab8':'#607080'}};
+function gc(){return{grid:isDark?'rgba(255,255,255,0.05)':'rgba(0,0,0,0.05)',tick:isDark?'#4a6070':'#607080',leg:isDark?'#7a9ab8':'#505060',tip:{bg:isDark?'#081224':'#fff',t:isDark?'#e8f0fe':'#0d1a2d',b:isDark?'#7a9ab8':'#607080'}};}
+
+function renderBar(labels,data){
+  const ctx=document.getElementById('cbar');if(!ctx)return;
+  if(typeof Chart==='undefined')return;
+  if(mChart)mChart.destroy();
+  const c=gc(),mx=data.indexOf(Math.max(...data));
+  mChart=new Chart(ctx,{type:'bar',
+    data:{labels,datasets:[{label:'ครั้ง',data,
+      backgroundColor:data.map((_,i)=>i===mx?'rgba(200,168,69,.85)':'rgba(79,142,247,.4)'),
+      borderColor:    data.map((_,i)=>i===mx?'#c8a845':'#4f8ef7'),
+      borderWidth:1.5,borderRadius:7,borderSkipped:false}]},
+    options:{responsive:true,maintainAspectRatio:false,animation:{duration:900,easing:'easeOutQuart'},
+      plugins:{legend:{display:false},tooltip:{backgroundColor:c.tip.bg,titleColor:c.tip.t,bodyColor:c.tip.b,borderColor:'rgba(200,168,69,.3)',borderWidth:1,padding:10,cornerRadius:8}},
+      scales:{x:{grid:{color:c.grid},ticks:{color:c.tick,font:{size:12,weight:'600'}}},
+              y:{grid:{color:c.grid},ticks:{color:c.tick,font:{size:11}}}}}});
+}
+function renderDonut(labels,data){
+  const ctx=document.getElementById('cdonut');if(!ctx)return;
+  if(typeof Chart==='undefined')return;
+  if(dChart)dChart.destroy();
+  const c=gc(),cols=['#c8a845','#4f8ef7','#18c3ad','#b06fff','#ff8c40'];
+  dChart=new Chart(ctx,{type:'doughnut',
+    data:{labels,datasets:[{data,backgroundColor:cols.map(x=>x+'cc'),borderColor:cols,borderWidth:2,hoverOffset:10}]},
+    options:{responsive:true,maintainAspectRatio:false,animation:{duration:900,easing:'easeOutQuart'},cutout:'64%',
+      plugins:{legend:{position:'bottom',labels:{color:c.leg,font:{size:10,weight:'600'},padding:10,boxWidth:10,usePointStyle:true,pointStyle:'circle'}},
+        tooltip:{backgroundColor:c.tip.bg,titleColor:c.tip.t,bodyColor:c.tip.b,borderColor:'rgba(200,168,69,.3)',borderWidth:1,padding:10,cornerRadius:8}}}});
+}
+
+/* ══════════════════════════════════════
+   DATA LOADING (ลองโหลด Google Sheets ก่อน)
+══════════════════════════════════════ */
+function setStatus(state,txt){document.getElementById('dot').className='dot '+state;$t('stxt',txt);}
+
+async function loadData(){
+  const rico=document.getElementById('rico');
+  if(rico) rico.className='spin go';
+  document.getElementById('ov').classList.add('show');
+  setStatus('loading','กำลังโหลด…');
+  let ok=false;
+  try{
+    // ใช้ AbortController แบบ manual สำหรับ browser เก่า
+    const ctrl=new AbortController();
+    const timer=setTimeout(()=>ctrl.abort(),6000);
+    try{
+      const res=await fetch(CSV_URL,{cache:'no-cache',signal:ctrl.signal});
+      clearTimeout(timer);
+      if(res.ok){
+        const txt=await res.text();
+        if(txt&&txt.length>200&&txt.includes(',')){
+          const rows=parseCSV(txt);
+          if(rows.length>10){
+            setStatus('ok',`Google Sheets — ${rows.length.toLocaleString()} รายการ`);
+            SRC='live';ok=true;
+          }
+        }
+      }
+    }catch(e){clearTimeout(timer);}
+  }catch(e){}
+  if(!ok){
+    setStatus('ok','ข้อมูลจริง 1,481 รายการ (ม.ค.–มิ.ย. 2568)');
+    SRC='embedded';
+  }
+  try{
+    const badge=document.getElementById('srcbadge');
+    if(badge) badge.innerHTML=`<span class="src-badge">✓ ${SRC==='live'?'ข้อมูลสด Google Sheets':'ข้อมูลจริง ม.ค.–มิ.ย. 2568'}</span>`;
+    render(getData());
+  }catch(e){console.error('render error:',e);}
+  // ซ่อน overlay เสมอ แม้จะ error
+  if(rico) rico.className='spin';
+  document.getElementById('ov').classList.remove('show');
+}
+
+/* ══════════════════════════════════════
+   LIVE CSV PARSER
+══════════════════════════════════════ */
+function parseCSV(text){
+  const lines=text.trim().split(/\r?\n/);
+  let start=1;
+  for(let i=0;i<Math.min(lines.length,5);i++){const c=sl(lines[i]);if(c[0]&&/^\d+$/.test(c[0].trim())){start=i;break;}}
+  const byMonth={};
+  for(let i=start;i<lines.length;i++){
+    const c=sl(lines[i]);
+    if(c.length<5||!/^\d+$/.test((c[0]||'').trim())) continue;
+    const gender=(c[3]||'').trim();if(!['M','F'].includes(gender.toUpperCase())&&!gender) continue;
+    const m=nm(c[6]);if(!m)continue;
+    if(!byMonth[m]) byMonth[m]={total:0,uniq:new Set(),sym:{},med:{},grp:{},time:{},gender:{},area:{}};
+    const d=byMonth[m];
+    d.total++;
+    const id=(c[1]||'').trim();if(id)d.uniq.add(id);
+    function add(o,v){if(v)o[v]=(o[v]||0)+1;}
+    add(d.gender,gender.toUpperCase()==='M'?'M':'F');
+    add(d.area,(c[5]||'').trim());
+    add(d.time,nt(c[7]));add(d.sym,ns(c[8]));add(d.med,(c[9]||'').trim().toUpperCase());add(d.grp,ng(c[10]));
+  }
+  // Build into RD format and inject
+  const months=Object.keys(byMonth);
+  for(const m of months){
+    const d=byMonth[m];
+    const s2a=(o,n=10)=>Object.entries(o).sort((a,b)=>b[1]-a[1]).slice(0,n).map(([k,v])=>[k,v]);
+    RD[m]={total:d.total,uniq:d.uniq.size,sym:s2a(d.sym),med:s2a(d.med),grp:s2a(d.grp),time:s2a(d.time,4),gender:d.gender,area:s2a(d.area,5)};
+  }
+  // Recompute __all__
+  const allMonths=Object.keys(RD).filter(k=>k!=='__all__');
+  const all=aggMonths(allMonths);if(all) RD['__all__']={...all,uniq:new Set(months.flatMap(m=>[])).size||all.uniq};
+  return months.flatMap(m=>Array(byMonth[m].total).fill(m));
+}
+function injectLiveData(rows){/* already injected in parseCSV */}
+function sl(line){const r=[];let cur='',q=false;for(let i=0;i<line.length;i++){const ch=line[i];if(ch==='"'){if(q&&line[i+1]==='"'){cur+='"';i++;}else q=!q;}else if(ch===','&&!q){r.push(cur);cur='';}else cur+=ch;}r.push(cur);return r;}
+function nm(m){return({'กุมาพันธ์':'กุมภาพันธ์','กุมาพันธ':'กุมภาพันธ์'})[m?.trim()]||m?.trim()||'';}
+function nt(t){t=(t||'').trim();if(/06|เช้า/.test(t))return'ช่วงเช้า (06:00–11:59)';if(/12:0|เที่ยง/.test(t))return'ช่วงเที่ยง (12:00–12:59)';if(/13|บ่าย/.test(t))return'ช่วงบ่าย (13:00–15:59)';if(/16|เย็น/.test(t))return'ช่วงเย็น (16:00–17:59)';return t;}
+function ns(s){s=(s||'').trim();if(/ปวดศร|ปวดศีร/.test(s))return'ปวดศีรษะ';if(/ปวดกล้ามเนื้อ|ปวดหลัง|ปวดขา/.test(s))return'ปวดกล้ามเนื้อ/ปวดหลัง';if(/จุกแน่นท้อง|ท้องอืด|แน่นท้อง/.test(s))return'ท้องอืด/แน่นท้อง';if(/ถ่ายเหลว|ปวดบิดท้อง|ท้องเสีย/.test(s))return'ถ่ายเหลว/ปวดบิดท้อง';if(/ไอ|เจ็บคอ/.test(s))return'ไอ/เจ็บคอ';if(/คัดจมูก|แน่นจมูก|น้ำมูก/.test(s))return'คัดจมูก/น้ำมูกไหล';if(/ผื่|ลมพิษ/.test(s))return'ผื่นคัน/ลมพิษ';if(/แผล|ถลอก/.test(s))return'แผลถลอก/แผลสด';if(/ประจำเดือน/.test(s))return'ปวดท้องประจำเดือน';if(/เวียนศ|มึนเวียน/.test(s))return'เวียนศีรษะ';return s;}
+function ng(g){g=(g||'').trim();if(/แก้ปวด|ลดไข้|ต้านการอักเสบ/.test(g))return'กลุ่มแก้ปวด/ลดไข้';if(/ทางเดินหายใจ|หวัด|แก้แพ้/.test(g))return'กลุ่มระบบทางเดินหายใจ';if(/ทางเดินอาหาร/.test(g))return'กลุ่มระบบทางเดินอาหาร';if(/ภายนอก|ผิวหนัง|แผลเฉพาะ/.test(g))return'กลุ่มยาใช้ภายนอก';if(/ปฐมพยาบาล|เวชภัณฑ์/.test(g))return'อุปกรณ์ปฐมพยาบาล';if(/เวียนศีรษะ|เมารถ/.test(g))return'กลุ่มแก้เวียนศีรษะ';if(/ยาตา|ดวงตา/.test(g))return'กลุ่มยาตา';if(/ฆ่าเชื้อ/.test(g))return'กลุ่มยาฆ่าเชื้อ';return g;}
+
+/* ══════════════════════════════════════
+   AI ANALYSIS ENGINE (built-in, no API key needed)
+══════════════════════════════════════ */
+function runAI(){
+  const d = getData();
+  if(!d){ return; }
+  const btn = document.getElementById('ai-run-btn');
+  const loading = document.getElementById('ai-loading');
+  const result = document.getElementById('ai-result');
+  btn.disabled = true;
+  loading.classList.add('show');
+  result.innerHTML = '';
+  // simulate brief analysis delay for UX
+  setTimeout(()=>{
+    try{ renderAIResult(analyzeData(d)); }catch(e){}
+    btn.disabled = false;
+    loading.classList.remove('show');
+  }, 900);
+}
+
+function analyzeData(d){
+  const symNames = d.sym.map(x=>x[0]);
+  const grpNames = d.grp.map(x=>x[0]);
+  const F=d.gender['F']||0, M=d.gender['M']||0, gT=F+M;
+  const fPct = gT ? Math.round(F/gT*100) : 0;
+  const topTime = d.time[0]?.[0]||'';
+  const total = d.total;
+
+  /* ── ตรวจจับปัญหาหลัก ── */
+  const hasHeadache    = symNames.some(s=>/ปวดศีรษะ|ไมเกรน/.test(s));
+  const hasMuscle      = symNames.some(s=>/กล้ามเนื้อ|ปวดหลัง|ปวดขา/.test(s));
+  const hasGI          = symNames.some(s=>/ท้อง|ถ่าย|แน่น|อาหาร/.test(s));
+  const hasRespir      = symNames.some(s=>/ไอ|เจ็บคอ|คัดจมูก|หวัด/.test(s));
+  const hasWound       = symNames.some(s=>/แผล|ถลอก/.test(s));
+  const hasDizzy       = symNames.some(s=>/เวียน/.test(s));
+  const hasSkin        = symNames.some(s=>/ผื่น|คัน|ลมพิษ/.test(s));
+  const hasPeriod      = symNames.some(s=>/ประจำเดือน/.test(s));
+  const highFemale     = fPct >= 60;
+  const isMorningPeak  = /เช้า/.test(topTime);
+  const isAfternoonPeak= /บ่าย/.test(topTime);
+  const hasOutdoor     = grpNames.some(g=>/ปฐมพยาบาล/.test(g));
+
+  /* ── สร้าง summary ── */
+  const topSym = d.sym[0]?.[0]||'';
+  const topSym2 = d.sym[1]?.[0]||'';
+  const filterLabel = FILTER==='all'?'ทุกช่วง':
+    FILTER==='1m'?'เดือนที่ผ่านมา':FILTER==='3m'?'3 เดือนที่ผ่านมา':
+    FILTER==='6m'?'6 เดือนที่ผ่านมา':FILTER==='12m'?'12 เดือนที่ผ่านมา':FILTER;
+  const summary = `ช่วง${filterLabel} พบการเข้าใช้บริการ ${total.toLocaleString()} ครั้ง ` +
+    `อาการหลักคือ${topSym}และ${topSym2} พนักงานหญิง ${fPct}% ชาย ${100-fPct}% ` +
+    `ช่วงเวลาที่มาใช้บริการมากที่สุดคือ${topTime.replace(/\s*\(.*\)/,'')}`;
+
+  /* ── สร้างหมวดกิจกรรม ── */
+  const cats = [];
+
+  /* 1. ออกกำลังกาย / ยืดเส้น */
+  if(hasHeadache || hasMuscle || hasDizzy){
+    const acts = [];
+    if(hasMuscle) acts.push('โปรแกรม Stretch & Flex ก่อนเริ่มงานทุกวัน (10 นาที)');
+    if(hasHeadache) acts.push('กิจกรรม "พักสายตา 20-20-20" ทุก 20 นาที สำหรับพนักงานหน้าจอ');
+    if(hasDizzy) acts.push('ชั้นเรียนโยคะเบื้องต้นช่วงพักกลางวัน สัปดาห์ละ 2 ครั้ง');
+    acts.push('ติดตั้งสถานีออกกำลังกายเบาๆ (Micro Gym) ในพื้นที่พักผ่อน');
+    if(isMorningPeak) acts.push('Morning Exercise ก่อนเข้างาน 07:30–08:00 น. นำโดย อสม.');
+    cats.push({icon:'🏃',title:'การออกกำลังกายและยืดเส้น',activities:acts.slice(0,4)});
+  }
+
+  /* 2. ความปลอดภัยและป้องกันอุบัติเหตุ */
+  if(hasWound || hasOutdoor){
+    cats.push({icon:'🦺',title:'ความปลอดภัยในการทำงาน',activities:[
+      'อบรม Safety Awareness รายไตรมาส เน้นการป้องกันแผลและการใช้อุปกรณ์ป้องกัน',
+      'แจก PPE (ถุงมือ รองเท้านิรภัย) และบังคับใช้อย่างเคร่งครัด',
+      'ติดป้าย Safety Reminder จุดเสี่ยงบนพื้นที่ทำงาน',
+      'กิจกรรม "Zero Accident Month" พร้อมรางวัลทีมที่ไม่มีอุบัติเหตุ',
+    ]});
+  }
+
+  /* 3. โภชนาการและระบบทางเดินอาหาร */
+  if(hasGI || hasRespir){
+    const acts = [];
+    if(hasGI){
+      acts.push('โปรแกรม "อาหารดี ท้องสบาย" ปรับเมนูโรงอาหารลดอาหารมัน-เผ็ด');
+      acts.push('จัดหาน้ำดื่มสะอาดและผลไม้ตามฤดูกาลบริการฟรีหน้าห้องพยาบาล');
+    }
+    if(hasRespir){
+      acts.push('รณรงค์ล้างมือ 7 ขั้นตอน + ติดตั้ง Hand Sanitizer ทุก 20 เมตร');
+      acts.push('ฉีดวัคซีนไข้หวัดใหญ่ประจำปีฟรีทุกคน');
+    }
+    acts.push('เวิร์กชอป "กินถูกหลัก สุขภาพดี" กับนักโภชนาการ ปีละ 2 ครั้ง');
+    cats.push({icon:'🥗',title:'โภชนาการและสุขอนามัย',activities:acts.slice(0,4)});
+  }
+
+  /* 4. สุขภาพจิตและความเครียด */
+  if(hasHeadache || total > 200){
+    const acts = [
+      'จัดห้อง Relax Room พร้อมเก้าอี้นวดและเสียงธรรมชาติ สำหรับพักผ่อนช่วงกลางวัน',
+      'โปรแกรม Mindfulness 5 นาที ก่อนประชุมทุกครั้ง',
+      'เปิดช่องทางปรึกษานักจิตวิทยาผ่านแอปฯ (ไม่ระบุชื่อ)',
+      'กิจกรรม Team Building รายไตรมาส เพื่อสร้างความสัมพันธ์ในทีม',
+    ];
+    if(isAfternoonPeak) acts.splice(1,0,'จัด Power Nap Zone สำหรับพักช่วงบ่าย 13:00–13:20 น.');
+    cats.push({icon:'🧠',title:'สุขภาพจิตและลดความเครียด',activities:acts.slice(0,4)});
+  }
+
+  /* 5. สิ่งแวดล้อมในการทำงาน */
+  {
+    const acts = [];
+    if(hasMuscle || hasHeadache)
+      acts.push('ปรับโต๊ะ-เก้าอี้ให้ได้มาตรฐาน Ergonomics ตรวจสอบทุก 6 เดือน');
+    if(hasSkin)
+      acts.push('ติดตั้งระบบระบายอากาศและลดฝุ่นละอองในสายการผลิต');
+    acts.push('ควบคุมอุณหภูมิห้องทำงาน 24–26°C ลดความเมื่อยล้า');
+    acts.push('จัดแสงสว่างให้เพียงพอตามมาตรฐาน ≥300 lux บนพื้นที่ทำงาน');
+    if(isMorningPeak)
+      acts.push('ตรวจวัดสภาพแวดล้อมการทำงาน (เสียง ฝุ่น ความร้อน) ช่วงเช้าที่มีคนหนาแน่น');
+    cats.push({icon:'🏭',title:'สภาพแวดล้อมการทำงาน',activities:acts.slice(0,4)});
+  }
+
+  /* 6. สุขภาพพนักงานหญิง (ถ้ามีสัดส่วนสูง) */
+  if(highFemale || hasPeriod){
+    cats.push({icon:'💜',title:'สุขภาพพนักงานหญิง',activities:[
+      hasPeriod?'จัดพื้นที่พักสำหรับพนักงานที่ปวดประจำเดือน พร้อมยาสามัญประจำบ้าน':'',
+      'ตรวจสุขภาพเชิงป้องกันสำหรับพนักงานหญิง (Pap Smear, Mammogram) ฟรีปีละครั้ง',
+      'โปรแกรมให้ความรู้เรื่องสุขภาพสตรีและการดูแลตนเองในที่ทำงาน',
+      'ออกแบบตารางกะให้เหมาะสมกับพนักงานหญิงที่มีภาระครอบครัว',
+    ].filter(Boolean).slice(0,4)});
+  }
+
+  return { summary, categories: cats.slice(0,5) };
+}
+
+function renderAIResult(data){
+  const result = document.getElementById('ai-result');
+  const filterLabel = FILTER==='all'?'ทุกช่วง':
+    FILTER==='1m'?'เดือนล่าสุด':FILTER==='3m'?'3 เดือนล่าสุด':
+    FILTER==='6m'?'6 เดือนล่าสุด':FILTER==='12m'?'12 เดือนล่าสุด':FILTER;
+
+  const cats = (data.categories||[]).map((c,i)=>`
+    <div class="ai-card" style="animation-delay:${.05+i*.08}s">
+      <div class="ai-card-h">
+        <span class="ai-card-ico">${c.icon||'💡'}</span>
+        <span class="ai-card-t">${c.title||''}</span>
+      </div>
+      <div class="ai-card-body">
+        <ul>${(c.activities||[]).map(a=>`<li>${a}</li>`).join('')}</ul>
+      </div>
+    </div>`).join('');
+
+  result.innerHTML = `
+    <div style="margin:14px 0 12px;padding:12px 16px;
+      background:rgba(176,111,255,.09);border-radius:10px;
+      border:1px solid rgba(176,111,255,.2);
+      font-size:12px;color:var(--txt2);line-height:1.7;transition:color .4s">
+      📊 <strong style="color:var(--purple)">ผลวิเคราะห์ช่วง${filterLabel}:</strong><br>${data.summary||''}
+    </div>
+    <div class="ai-cards">${cats}</div>
+    <button class="ai-rerun" onclick="runAI()" style="margin-top:14px">🔄 วิเคราะห์ใหม่</button>`;
+}
+
+// sync mobile bottom bar with main filter
+function setFM(val,el){
+  FILTER=val;
+  document.querySelectorAll('.pbtn,.mbtn').forEach(b=>b.classList.remove('on'));
+  // activate in both bars
+  document.querySelectorAll('.pbtn').forEach(b=>{
+    if((b.getAttribute('onclick')||'').includes("'"+val+"'")||
+       (b.getAttribute('onclick')||'').includes('"'+val+'"')) b.classList.add('on');
+  });
+  el.classList.add('on');
+  render(getData());
+}
+
+window.addEventListener('load',loadData);
+</script>
+</body>
+</html>
