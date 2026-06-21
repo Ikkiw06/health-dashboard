@@ -248,7 +248,7 @@ footer{text-align:center;padding:14px 0;font-size:11px;color:var(--muted);border
 <div class="shdr" style="animation-delay:.2s"><h2>👑 Top 5 ผู้ใช้บริการบ่อยที่สุด</h2><div class="shdr-line"></div></div>
 <div class="tvcard" style="animation-delay:.22s">
   <div class="tvhdr">
-    <div class="tvhl"><div class="tvi2">🏅</div><div><div class="tvt" id="tvtitle">อันดับเดือนที่มีผู้ใช้บริการมากที่สุด</div><div class="tvs" id="tvsub">Monthly Visit Ranking — ม.ค.–มิ.ย. 2568</div></div></div>
+    <div class="tvhl"><div class="tvi2">🏅</div><div><div class="tvt" id="tvtitle">Top 5 ผู้ใช้บริการบ่อยที่สุด</div><div class="tvs" id="tvsub">กรุณาเชื่อมต่อ Google Sheets เพื่อดูรายชื่อพนักงาน</div></div></div>
     <span class="tvnote"><span class="tvsrc emb" id="tvsrc">ข้อมูลฝัง</span></span>
   </div>
   <div class="tvgrid" id="tvgrid"></div>
@@ -306,13 +306,10 @@ function renderTopVis(){
     const mx=TOP_VIS[0].visits;
     grid.innerHTML=TOP_VIS.map((p,i)=>{const emo=p.gender==='F'?'👩':'👨';const gb=p.gender==='F'?'<span class="tvbdg tvbdg-f">👩 หญิง</span>':'<span class="tvbdg tvbdg-m">👨 ชาย</span>';const ab=p.area?'<span class="tvbdg tvbdg-n">📍'+p.area+'</span>':'';const dn=p.name&&p.name!==p.id?p.name:p.id;return '<div class="tvitem" style="animation-delay:'+(0.06+i*0.09)+'s"><div class="tvrank '+rc[i]+'">'+md[i]+'</div><div class="tvava '+ava[i]+'">'+emo+'</div><div class="tvname" title="'+dn+'">'+dn+'</div>'+(p.name&&p.name!==p.id?'<div class="tvid">'+p.id+'</div>':'<div class="tvid">&nbsp;</div>')+'<div class="tvcnt">'+p.visits+'</div><div class="tvunit">ครั้ง</div><div class="tvbadges">'+gb+ab+'</div><div class="tvbar"><div class="tvfill" data-w="'+(p.visits/mx*100).toFixed(1)+'"></div></div></div>';}).join('');
   } else {
-    if(src){src.textContent='ข้อมูลฝัง';src.className='tvsrc emb';}
-    if(tt)tt.textContent='อันดับเดือนที่มีผู้ใช้บริการมากที่สุด';
-    if(ts)ts.textContent='Monthly Ranking · โหลด Google Sheets เพื่อดูรายชื่อพนักงาน';
-    const thsh={'มกราคม':'ม.ค.','กุมภาพันธ์':'ก.พ.','มีนาคม':'มี.ค.','เมษายน':'เม.ย.','พฤษภาคม':'พ.ค.','มิถุนายน':'มิ.ย.'};
-    const mos=['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน'].filter(m=>RD[m]&&RD[m].total>1).map(m=>({m,total:RD[m].total,uniq:RD[m].uniq,F:RD[m].gender['F']||0,M:RD[m].gender['M']||0})).sort((a,b)=>b.total-a.total).slice(0,5);
-    const mx2=mos[0]?mos[0].total:1;
-    grid.innerHTML=mos.map((d,i)=>{const fp=d.F+d.M?Math.round(d.F/(d.F+d.M)*100):0;return '<div class="tvitem" style="animation-delay:'+(0.06+i*0.09)+'s"><div class="tvrank '+rc[i]+'">'+md[i]+'</div><div class="tvava '+ava[i]+'" style="font-size:22px">📅</div><div class="tvname">'+thsh[d.m]+'</div><div class="tvid">'+d.m+'</div><div class="tvcnt">'+d.total.toLocaleString()+'</div><div class="tvunit">ครั้ง</div><div class="tvbadges"><span class="tvbdg tvbdg-n">👥 '+d.uniq+' คน</span><span class="tvbdg tvbdg-f">♀ '+fp+'%</span></div><div class="tvbar"><div class="tvfill" data-w="'+(d.total/mx2*100).toFixed(1)+'"></div></div></div>';}).join('');
+    if(src){src.textContent='โหลด Sheets เพื่อดูรายชื่อ';src.className='tvsrc emb';}
+    if(tt)tt.textContent='Top 5 ผู้ใช้บริการบ่อยที่สุด';
+    if(ts)ts.textContent='กรุณาเชื่อมต่อ Google Sheets เพื่อดูรายชื่อพนักงาน';
+    grid.innerHTML='<div style="grid-column:1/-1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:36px 20px;gap:10px;text-align:center"><div style="font-size:36px;opacity:.4">🔗</div><div style="font-size:13px;font-weight:700;color:var(--txt);margin-bottom:4px">ต้องเชื่อมต่อ Google Sheets</div><div style="font-size:12px;color:var(--muted);max-width:300px;line-height:1.7">รายชื่อพนักงานที่เข้าใช้บริการบ่อยที่สุดจะแสดงที่นี่<br>เมื่อมีการเชื่อมต่อฐานข้อมูลสด</div></div>';
   }
   requestAnimationFrame(()=>requestAnimationFrame(()=>{grid.querySelectorAll('.tvfill').forEach(b=>{b.style.width=b.dataset.w+'%';});}));
 }
