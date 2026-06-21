@@ -2,77 +2,50 @@
 <html lang="th" data-theme="dark">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0"/>
 <meta name="mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <meta name="theme-color" content="#030912"/>
 <title>Health Room Analytics</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
-/* ══════════════════════════════════════
-   THEME TOKENS
-══════════════════════════════════════ */
 :root,[data-theme="dark"]{
-  --bg0:#030912;--bg1:#060f1e;--card:rgba(8,18,36,0.9);--card2:rgba(11,22,44,0.7);
+  --bg0:#030912;--card:rgba(8,18,36,0.92);--card2:rgba(11,22,44,0.7);
   --bdr:rgba(200,168,69,0.12);--bdr2:rgba(200,168,69,0.22);
-  --hdr:linear-gradient(135deg,#040d1d 0%,#091428 60%,#040d1a 100%);
-  --gold:#c8a845;--gold2:#e8c96a;--golddim:rgba(200,168,69,0.13);
+  --hdr:linear-gradient(135deg,#040d1d,#091428,#040d1a);
+  --gold:#c8a845;--gold2:#e8c96a;--gdim:rgba(200,168,69,0.13);
   --txt:#e8f0fe;--txt2:#b0c0d8;--muted:#5a7080;
   --blue:#4f8ef7;--teal:#18c3ad;--purple:#b06fff;--orange:#ff8c40;--rose:#ff5577;--green:#30d988;
   --grid:rgba(255,255,255,0.05);--tick:#4a6070;--leg:#7a9ab8;
-  --sh:0 8px 32px rgba(0,0,0,0.5);--sh2:0 2px 12px rgba(0,0,0,0.35);
-  --ov-bg:rgba(3,9,18,0.9);
+  --sh:0 8px 32px rgba(0,0,0,.5);--sh2:0 2px 12px rgba(0,0,0,.35);
+  --ov:rgba(3,9,18,0.92);
 }
 [data-theme="light"]{
-  --bg0:#edf2f8;--bg1:#f4f7fb;--card:rgba(255,255,255,0.95);--card2:rgba(248,251,255,0.95);
-  --bdr:rgba(0,0,0,0.08);--bdr2:rgba(200,168,69,0.3);
-  --hdr:linear-gradient(135deg,#0c1e3c 0%,#152d52 60%,#0a1a30 100%);
+  --bg0:#edf2f8;--card:rgba(255,255,255,0.96);--card2:rgba(248,251,255,0.95);
+  --bdr:rgba(0,0,0,0.08);--bdr2:rgba(200,168,69,0.28);
+  --hdr:linear-gradient(135deg,#0c1e3c,#152d52,#0a1a30);
   --txt:#0d1a2d;--txt2:#2c4060;--muted:#607080;
   --grid:rgba(0,0,0,0.05);--tick:#607080;--leg:#505060;
-  --sh:0 8px 32px rgba(0,0,0,0.1);--sh2:0 2px 12px rgba(0,0,0,0.07);
-  --ov-bg:rgba(237,242,248,0.92);
+  --sh:0 8px 32px rgba(0,0,0,.1);--sh2:0 2px 12px rgba(0,0,0,.07);
+  --ov:rgba(237,242,248,0.94);
 }
+@keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes slideL{from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:translateX(0)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes glow{0%,100%{opacity:.6}50%{opacity:1}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
 
-/* ══════════════════════════════════════
-   KEYFRAMES
-══════════════════════════════════════ */
-@keyframes fadeUp  {from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
-@keyframes fadeIn  {from{opacity:0}to{opacity:1}}
-@keyframes slideL  {from{opacity:0;transform:translateX(-12px)}to{opacity:1;transform:translateX(0)}}
-@keyframes pulse   {0%,100%{opacity:1}50%{opacity:.35}}
-@keyframes spin    {to{transform:rotate(360deg)}}
-@keyframes glow    {0%,100%{opacity:.6}50%{opacity:1}}
-@keyframes float   {0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
-@keyframes shimmer {0%{background-position:-200% 0}100%{background-position:200% 0}}
-@keyframes borderPulse{0%,100%{box-shadow:0 0 0 0 rgba(200,168,69,0)}50%{box-shadow:0 0 0 3px rgba(200,168,69,.15)}}
-
-/* ══════════════════════════════════════
-   BASE
-══════════════════════════════════════ */
 *{box-sizing:border-box;margin:0;padding:0}
-body{
-  background:var(--bg0);color:var(--txt);
-  font-family:'Segoe UI',system-ui,sans-serif;
-  min-height:100vh;font-size:14px;
-  transition:background .4s,color .4s;
-  overflow-x:hidden;
-}
-/* background mesh */
-body::before{
-  content:'';position:fixed;inset:0;z-index:-1;
-  background:
-    radial-gradient(ellipse 80% 60% at 10% 20%,rgba(59,91,200,.07) 0%,transparent 60%),
-    radial-gradient(ellipse 60% 70% at 90% 70%,rgba(20,184,166,.06) 0%,transparent 60%),
-    radial-gradient(ellipse 50% 50% at 50% 0%,  rgba(200,168,69,.04) 0%,transparent 50%);
-  transition:opacity .4s;
-}
-[data-theme="light"] body::before{opacity:.5}
+body{background:var(--bg0);color:var(--txt);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;font-size:14px;transition:background .4s,color .4s;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;z-index:-1;
+  background:radial-gradient(ellipse 80% 60% at 10% 20%,rgba(59,91,200,.07),transparent 60%),
+  radial-gradient(ellipse 60% 70% at 90% 70%,rgba(20,184,166,.06),transparent 60%),
+  radial-gradient(ellipse 50% 50% at 50% 0%,rgba(200,168,69,.04),transparent 50%)}
 
-/* ══════════════════════════════════════
-   OVERLAY
-══════════════════════════════════════ */
-.ov{position:fixed;inset:0;z-index:300;background:var(--ov-bg);backdrop-filter:blur(14px);
+/* overlay */
+.ov{position:fixed;inset:0;z-index:300;background:var(--ov);backdrop-filter:blur(14px);
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;
   opacity:0;pointer-events:none;transition:opacity .3s}
 .ov.show{opacity:1;pointer-events:all}
@@ -80,152 +53,100 @@ body::before{
 .ov-txt{font-size:16px;font-weight:700;color:var(--txt)}
 .ov-sub{font-size:12px;color:var(--muted)}
 
-/* ══════════════════════════════════════
-   HEADER
-══════════════════════════════════════ */
-header{
-  background:var(--hdr);
-  border-bottom:1px solid rgba(200,168,69,.18);
-  padding:0 28px;height:64px;
-  display:flex;align-items:center;justify-content:space-between;
-  position:sticky;top:0;z-index:200;
-  backdrop-filter:blur(16px);
-  animation:fadeIn .5s ease;
-}
+/* header */
+header{background:var(--hdr);border-bottom:1px solid rgba(200,168,69,.18);padding:0 28px;height:64px;
+  display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:200;
+  backdrop-filter:blur(16px);animation:fadeIn .5s ease}
 .hl{display:flex;align-items:center;gap:13px}
-.logo{
-  width:38px;height:38px;flex-shrink:0;
-  background:linear-gradient(135deg,var(--gold) 0%,var(--gold2) 100%);
+.logo{width:38px;height:38px;flex-shrink:0;background:linear-gradient(135deg,var(--gold),var(--gold2));
   border-radius:10px;display:grid;place-items:center;font-size:18px;
-  box-shadow:0 0 18px rgba(200,168,69,.4);
-  animation:glow 3s ease-in-out infinite;
-}
-.ht{font-size:14px;font-weight:700;color:#fff;line-height:1.25;letter-spacing:.01em}
+  box-shadow:0 0 18px rgba(200,168,69,.4);animation:glow 3s ease-in-out infinite}
+.ht{font-size:14px;font-weight:700;color:#fff;line-height:1.25}
 .hs{font-size:10px;color:rgba(255,255,255,.4);margin-top:1px;letter-spacing:.04em;text-transform:uppercase}
 .hr{display:flex;align-items:center;gap:8px}
-#sbadge{display:flex;align-items:center;gap:7px;padding:5px 13px;border-radius:20px;
-  font-size:11px;font-weight:600;border:1px solid rgba(255,255,255,.12);
-  background:rgba(255,255,255,.05);color:#fff;transition:all .3s}
+#sbadge{display:flex;align-items:center;gap:7px;padding:5px 13px;border-radius:20px;font-size:11px;font-weight:600;
+  border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);color:#fff;transition:all .3s}
 .dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.25);transition:all .3s}
 .dot.loading{background:var(--gold);animation:pulse 1s infinite}
 .dot.ok{background:#30d988}
-.dot.err{background:#ff5577}
-.hbtn{
-  background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);
-  color:#fff;padding:6px 13px;border-radius:8px;cursor:pointer;
-  font-size:12px;font-weight:600;transition:all .2s;display:flex;align-items:center;gap:6px;
-}
+.hbtn{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);color:#fff;
+  padding:6px 13px;border-radius:8px;cursor:pointer;font-size:12px;font-weight:600;
+  transition:all .2s;display:flex;align-items:center;gap:6px;font-family:inherit}
 .hbtn:hover{background:rgba(200,168,69,.15);border-color:var(--gold);color:var(--gold)}
-.spin{display:inline-block}.spin.go{animation:spin .7s linear infinite}
+.sp{display:inline-block}.sp.go{animation:spin .7s linear infinite}
 
-/* ══════════════════════════════════════
-   MAIN
-══════════════════════════════════════ */
-main{max-width:1440px;margin:0 auto;padding:22px 22px 44px}
+main{max-width:1440px;margin:0 auto;padding:22px 22px 120px}
 
-/* ══════════════════════════════════════
-   FILTER BOX
-══════════════════════════════════════ */
-.fbox{
-  background:var(--card);border:1px solid var(--bdr);border-radius:16px;
-  padding:14px 18px;margin-bottom:18px;
-  box-shadow:var(--sh2);backdrop-filter:blur(12px);
-  animation:fadeUp .4s ease backwards;
-  transition:background .4s,border-color .4s;
-}
+/* filter */
+.fbox{background:var(--card);border:1px solid var(--bdr);border-radius:16px;padding:14px 18px;
+  margin-bottom:18px;box-shadow:var(--sh2);backdrop-filter:blur(12px);
+  animation:fadeUp .4s ease backwards;transition:background .4s,border-color .4s}
 .frow{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .frow+.frow{margin-top:10px;padding-top:10px;border-top:1px solid var(--bdr)}
 .flbl{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.7px;min-width:70px;flex-shrink:0}
 .fbtns{display:flex;gap:5px;flex-wrap:wrap}
-.pbtn,.mbtn{
-  border:1px solid var(--bdr2);background:var(--card2);color:var(--txt2);
-  padding:5px 13px;border-radius:7px;cursor:pointer;
-  font-size:12px;font-weight:600;transition:all .17s;white-space:nowrap;
-  backdrop-filter:blur(6px);
-}
-.pbtn:hover,.mbtn:hover{border-color:var(--gold);color:var(--gold);background:var(--golddim)}
-.pbtn.on{
-  background:linear-gradient(135deg,var(--gold),var(--gold2));
-  color:#0a0a0a;border-color:transparent;
-  box-shadow:0 3px 14px rgba(200,168,69,.4);transform:translateY(-1px);
-  font-weight:700;
-}
-.mbtn.on{background:var(--golddim);color:var(--gold);border-color:var(--gold)}
-.mbtn.dim{opacity:.28;cursor:default}
-.abtn{
-  border:1px solid rgba(24,195,173,.25);background:var(--card2);color:var(--txt2);
-  padding:5px 14px;border-radius:7px;cursor:pointer;
-  font-size:12px;font-weight:600;transition:all .17s;white-space:nowrap;
-  backdrop-filter:blur(6px);
-}
-.abtn:hover{border-color:var(--teal);color:var(--teal);background:rgba(24,195,173,.1)}
-.abtn.on{
-  background:linear-gradient(135deg,#0a7060,var(--teal));
-  color:#fff;border-color:transparent;
-  box-shadow:0 3px 14px rgba(24,195,173,.35);transform:translateY(-1px);
-  font-weight:700;
-}
 
-/* ══════════════════════════════════════
-   KPI GRID
-══════════════════════════════════════ */
+/* period buttons - gold */
+.pbtn,.mbtn{border:1px solid var(--bdr2);background:var(--card2);color:var(--txt2);
+  padding:5px 13px;border-radius:7px;cursor:pointer;font-size:12px;font-weight:600;
+  transition:all .17s;white-space:nowrap;backdrop-filter:blur(6px);font-family:inherit}
+.pbtn:hover,.mbtn:hover{border-color:var(--gold);color:var(--gold);background:var(--gdim)}
+.pbtn.on{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#0a0a0a;
+  border-color:transparent;box-shadow:0 3px 14px rgba(200,168,69,.4);transform:translateY(-1px);font-weight:700}
+.mbtn.on{background:var(--gdim);color:var(--gold);border-color:var(--gold)}
+.mbtn.dim{opacity:.28;cursor:default}
+
+/* area buttons - teal */
+.abtn{border:1px solid rgba(24,195,173,.25);background:var(--card2);color:var(--txt2);
+  padding:5px 14px;border-radius:7px;cursor:pointer;font-size:12px;font-weight:600;
+  transition:all .17s;white-space:nowrap;font-family:inherit}
+.abtn:hover{border-color:var(--teal);color:var(--teal);background:rgba(24,195,173,.1)}
+.abtn.on{background:linear-gradient(135deg,#0a7060,var(--teal));color:#fff;
+  border-color:transparent;box-shadow:0 3px 14px rgba(24,195,173,.35);transform:translateY(-1px);font-weight:700}
+
+/* KPI */
 .kgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:13px;margin-bottom:18px}
-.kcard{
-  border-radius:16px;padding:18px 16px;position:relative;overflow:hidden;
-  border:1px solid var(--bdr);cursor:default;
-  transition:transform .22s,box-shadow .22s;
-  box-shadow:var(--sh2);
-  animation:fadeUp .5s ease backwards;
-  backdrop-filter:blur(12px);
-}
-.kcard::before{
-  content:'';position:absolute;inset:0;
-  background:linear-gradient(135deg,var(--k-c1,var(--gold)) 0%,var(--k-c2,var(--gold2)) 100%);
-  opacity:.07;border-radius:16px;transition:opacity .2s;
-}
-.kcard::after{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:16px 16px 0 0;background:linear-gradient(90deg,var(--k-c1),var(--k-c2))}
+.kcard{border-radius:16px;padding:18px 16px;position:relative;overflow:hidden;border:1px solid var(--bdr);
+  transition:transform .22s,box-shadow .22s;box-shadow:var(--sh2);
+  animation:fadeUp .5s ease backwards;backdrop-filter:blur(12px)}
+.kcard::before{content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,var(--k1,var(--gold)),var(--k2,var(--gold2)));opacity:.07;transition:opacity .2s}
+.kcard::after{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:16px 16px 0 0;
+  background:linear-gradient(90deg,var(--k1),var(--k2))}
 .kcard:hover{transform:translateY(-4px);box-shadow:var(--sh)}
-.kcard:hover::before{opacity:.14}
-.k-gold{background:var(--card);--k-c1:#c8a845;--k-c2:#e8c96a}
-.k-blue{background:var(--card);--k-c1:#2563eb;--k-c2:#4f8ef7}
-.k-rose{background:var(--card);--k-c1:#e11d48;--k-c2:#ff5577}
-.k-grn {background:var(--card);--k-c1:#059669;--k-c2:#30d988}
-.k-pur {background:var(--card);--k-c1:#7c3aed;--k-c2:#b06fff}
+.kcard:hover::before{opacity:.13}
+.k0{background:var(--card);--k1:#c8a845;--k2:#e8c96a}
+.k1{background:var(--card);--k1:#2563eb;--k2:#4f8ef7}
+.k2{background:var(--card);--k1:#e11d48;--k2:#ff5577}
+.k3{background:var(--card);--k1:#059669;--k2:#30d988}
+.k4{background:var(--card);--k1:#7c3aed;--k2:#b06fff}
 .ki{font-size:24px;margin-bottom:10px}
 .kl{font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
 .kv{font-size:28px;font-weight:800;line-height:1;color:var(--txt);transition:color .4s}
 .ks{font-size:11px;color:var(--muted);margin-top:6px}
 
-/* ══════════════════════════════════════
-   SECTION HEADER
-══════════════════════════════════════ */
+/* section header */
 .shdr{display:flex;align-items:center;gap:10px;margin:22px 0 13px;animation:fadeUp .5s ease backwards}
 .shdr h2{font-size:14px;font-weight:800;color:var(--txt);white-space:nowrap;letter-spacing:.02em;text-transform:uppercase;transition:color .4s}
 .shdr-line{flex:1;height:1px;background:linear-gradient(90deg,var(--bdr2),transparent)}
 
-/* ══════════════════════════════════════
-   TOP-5 GRID
-══════════════════════════════════════ */
+/* top-5 */
 .t5g{display:grid;grid-template-columns:repeat(4,1fr);gap:13px;margin-bottom:22px}
-.t5{
-  background:var(--card);border:1px solid var(--bdr);border-radius:16px;
-  padding:18px;backdrop-filter:blur(12px);
-  transition:transform .22s,box-shadow .22s,border-color .22s;
-  box-shadow:var(--sh2);animation:fadeUp .5s ease backwards;
-}
+.t5{background:var(--card);border:1px solid var(--bdr);border-radius:16px;padding:18px;
+  backdrop-filter:blur(12px);transition:transform .22s,box-shadow .22s,border-color .22s;
+  box-shadow:var(--sh2);animation:fadeUp .5s ease backwards}
 .t5:hover{transform:translateY(-3px);box-shadow:var(--sh);border-color:var(--bdr2)}
 .t5h{display:flex;align-items:center;gap:10px;margin-bottom:16px}
 .t5i{width:36px;height:36px;border-radius:9px;display:grid;place-items:center;font-size:17px;flex-shrink:0}
-.io{background:rgba(255,140,64,.14)}.ib{background:rgba(79,142,247,.14)}.it{background:rgba(24,195,173,.14)}.ip{background:rgba(176,111,255,.14)}
+.io{background:rgba(255,140,64,.14)}.ib{background:rgba(79,142,247,.14)}
+.it{background:rgba(24,195,173,.14)}.ip{background:rgba(176,111,255,.14)}
 .t5t{font-size:13px;font-weight:700;color:var(--txt);transition:color .4s}
 .t5s{font-size:10px;color:var(--muted);margin-top:1px}
-
-/* Rank rows */
 .ri{margin-bottom:10px;animation:slideL .4s ease backwards}
 .ri:last-child{margin-bottom:0}
 .rh{display:flex;align-items:center;gap:8px;margin-bottom:5px}
 .rb{width:22px;height:22px;border-radius:6px;display:grid;place-items:center;font-size:11px;font-weight:800;flex-shrink:0}
-.rb1{background:linear-gradient(135deg,#a87a1a,#e8c96a,#c8a845);color:#0a0800;text-shadow:0 1px 0 rgba(255,255,255,.2)}
+.rb1{background:linear-gradient(135deg,#a87a1a,#e8c96a,#c8a845);color:#0a0800}
 .rb2{background:linear-gradient(135deg,#555,#aaa,#888);color:#fff}
 .rb3{background:linear-gradient(135deg,#6b2d00,#c87020,#a05018);color:#fff}
 .rb4,.rb5{background:var(--card2);color:var(--muted);border:1px solid var(--bdr)}
@@ -239,31 +160,20 @@ main{max-width:1440px;margin:0 auto;padding:22px 22px 44px}
 .bt{background:linear-gradient(90deg,#0a7060,var(--teal),#80e8d8)}
 .bp{background:linear-gradient(90deg,#5010a0,var(--purple),#d090ff)}
 
-/* ══════════════════════════════════════
-   CHARTS ROW
-══════════════════════════════════════ */
+/* charts */
 .chrow{display:grid;grid-template-columns:1fr 360px;gap:13px;margin-bottom:22px}
-.chcard{
-  background:var(--card);border:1px solid var(--bdr);border-radius:16px;
-  padding:18px;box-shadow:var(--sh2);backdrop-filter:blur(12px);
-  animation:fadeUp .55s ease backwards;transition:background .4s,border-color .4s;
-}
+.chcard{background:var(--card);border:1px solid var(--bdr);border-radius:16px;padding:18px;
+  box-shadow:var(--sh2);backdrop-filter:blur(12px);animation:fadeUp .55s ease backwards;transition:background .4s,border-color .4s}
 .cht{font-size:13px;font-weight:700;color:var(--txt);transition:color .4s}
 .chs{font-size:10px;color:var(--muted);margin-top:2px;margin-bottom:14px;text-transform:uppercase;letter-spacing:.04em}
 .chw{position:relative}
 
-/* ══════════════════════════════════════
-   BOTTOM ROW
-══════════════════════════════════════ */
+/* bottom row */
 .brow{display:grid;grid-template-columns:repeat(3,1fr);gap:13px;margin-bottom:22px}
-.mini{
-  background:var(--card);border:1px solid var(--bdr);border-radius:16px;
-  padding:18px;box-shadow:var(--sh2);backdrop-filter:blur(12px);
-  animation:fadeUp .6s ease backwards;transition:background .4s,border-color .4s;
-}
+.mini{background:var(--card);border:1px solid var(--bdr);border-radius:16px;padding:18px;
+  box-shadow:var(--sh2);backdrop-filter:blur(12px);animation:fadeUp .6s ease backwards;transition:background .4s,border-color .4s}
 .mt{font-size:13px;font-weight:700;color:var(--txt);transition:color .4s}
 .ms{font-size:10px;color:var(--muted);margin-top:2px;margin-bottom:14px;text-transform:uppercase;letter-spacing:.04em}
-/* gender */
 .gr{margin-bottom:13px}.gr:last-child{margin-bottom:0}
 .gh{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}
 .gl{font-size:12px;color:var(--txt);font-weight:600;transition:color .4s}
@@ -273,239 +183,110 @@ main{max-width:1440px;margin:0 auto;padding:22px 22px 44px}
 .gm{background:linear-gradient(90deg,#1236b0,var(--blue),#90c0ff)}
 .gf{background:linear-gradient(90deg,#8a0030,var(--rose),#ff9ab0)}
 .gp{font-size:10px;color:var(--muted)}
-/* area */
 .ai{margin-bottom:10px}.ai:last-child{margin-bottom:0}
 .aih{display:flex;justify-content:space-between;margin-bottom:4px}
 .ain{font-size:12px;color:var(--txt);font-weight:600;transition:color .4s}
 .aic{font-size:12px;font-weight:700;color:var(--teal)}
 .aibg{background:var(--card2);border-radius:99px;height:7px;overflow:hidden}
 .aifill{height:100%;background:linear-gradient(90deg,#0a7060,var(--teal),#80ffd8);border-radius:99px;width:0%;transition:width .85s cubic-bezier(.4,0,.2,1)}
-/* stat */
-.si{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:8px 12px;background:var(--card2);border-radius:9px;
-  border:1px solid var(--bdr);transition:background .4s,border-color .4s;
-  animation:fadeUp .5s ease backwards;
-}
+.si{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;
+  background:var(--card2);border-radius:9px;border:1px solid var(--bdr);
+  transition:background .4s,border-color .4s;animation:fadeUp .5s ease backwards}
 .sl{font-size:12px;color:var(--muted)}
 .sv{font-size:13px;font-weight:700;color:var(--gold2)}
 
-/* ══════════════════════════════════════
-   DATA SOURCE BADGE
-══════════════════════════════════════ */
-.src-badge{
-  display:inline-flex;align-items:center;gap:6px;
-  padding:4px 10px;border-radius:99px;font-size:11px;font-weight:600;
-  background:rgba(48,217,136,.1);border:1px solid rgba(48,217,136,.3);color:#30d988;
-}
-
-/* ══════════════════════════════════════
-   AI SECTION
-══════════════════════════════════════ */
-.ai-box{
-  background:var(--card);border:1px solid var(--bdr2);border-radius:16px;
-  padding:22px;margin-bottom:22px;backdrop-filter:blur(12px);
-  box-shadow:var(--sh2);animation:fadeUp .6s ease backwards;
-  transition:background .4s,border-color .4s;
-  position:relative;overflow:hidden;
-}
-.ai-box::before{
-  content:'';position:absolute;inset:0;
-  background:linear-gradient(135deg,rgba(176,111,255,.05) 0%,rgba(79,142,247,.05) 100%);
-  pointer-events:none;
-}
-.ai-top{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap}
-.ai-meta{flex:1}
+/* AI section */
+.aibox{background:var(--card);border:1px solid var(--bdr2);border-radius:16px;
+  padding:22px;margin-bottom:22px;backdrop-filter:blur(12px);box-shadow:var(--sh2);
+  animation:fadeUp .6s ease backwards;transition:background .4s,border-color .4s;position:relative;overflow:hidden}
+.aibox::before{content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(176,111,255,.05),rgba(79,142,247,.05));pointer-events:none}
 .ai-title{font-size:15px;font-weight:800;color:var(--txt);margin-bottom:4px;transition:color .4s}
-.ai-sub{font-size:11px;color:var(--muted);margin-bottom:14px;line-height:1.5}
-.ai-key-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.ai-input{
-  flex:1;min-width:200px;
-  background:var(--card2);border:1px solid var(--bdr2);
-  color:var(--txt);border-radius:9px;padding:9px 13px;
-  font-size:12px;outline:none;transition:border-color .2s,background .4s;
-  font-family:inherit;
-}
-.ai-input:focus{border-color:var(--purple)}
-.ai-input::placeholder{color:var(--muted)}
-.ai-run{
-  background:linear-gradient(135deg,#7c3aed,var(--purple));
-  border:none;color:#fff;padding:9px 18px;border-radius:9px;
-  font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;
-  transition:opacity .2s,transform .15s;box-shadow:0 3px 14px rgba(176,111,255,.4);
-  font-family:inherit;
-}
-.ai-run:hover{opacity:.88;transform:translateY(-1px)}
-.ai-run:disabled{opacity:.45;cursor:not-allowed;transform:none}
-.ai-hint{font-size:10px;color:var(--muted);margin-top:6px}
-.ai-hint a{color:var(--purple);text-decoration:none}
-
-/* loading dots */
-.ai-loading{display:none;align-items:center;gap:10px;padding:18px 0;color:var(--muted);font-size:13px}
-.ai-loading.show{display:flex}
-.dot3{display:flex;gap:5px}
-.dot3 span{width:7px;height:7px;border-radius:50%;background:var(--purple);animation:pulse 1.2s ease-in-out infinite}
-.dot3 span:nth-child(2){animation-delay:.2s}
-.dot3 span:nth-child(3){animation-delay:.4s}
-
-/* result cards */
+.ai-sub{font-size:11px;color:var(--muted);margin-bottom:16px;line-height:1.6}
+.ai-btn{background:linear-gradient(135deg,#7c3aed,var(--purple));border:none;color:#fff;
+  padding:11px 24px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;
+  transition:opacity .2s,transform .15s;box-shadow:0 4px 16px rgba(176,111,255,.4);font-family:inherit;display:inline-flex;align-items:center;gap:8px}
+.ai-btn:hover{opacity:.88;transform:translateY(-1px)}
+.ai-btn:disabled{opacity:.45;cursor:not-allowed;transform:none}
+.ai-ld{display:none;align-items:center;gap:10px;padding:16px 0;color:var(--muted);font-size:13px}
+.ai-ld.show{display:flex}
+.d3{display:flex;gap:5px}
+.d3 span{width:7px;height:7px;border-radius:50%;background:var(--purple);animation:pulse 1.2s ease-in-out infinite}
+.d3 span:nth-child(2){animation-delay:.2s}.d3 span:nth-child(3){animation-delay:.4s}
 .ai-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;margin-top:18px}
-.ai-card{
-  background:var(--card2);border:1px solid var(--bdr);border-radius:12px;
-  padding:14px 16px;animation:fadeUp .4s ease backwards;
-  transition:background .4s,border-color .4s;
-}
-.ai-card-h{display:flex;align-items:center;gap:8px;margin-bottom:10px}
-.ai-card-ico{font-size:20px}
-.ai-card-t{font-size:12px;font-weight:800;color:var(--txt);transition:color .4s}
-.ai-card-body{font-size:12px;color:var(--txt2);line-height:1.7;transition:color .4s}
-.ai-card-body ul{padding-left:16px}
-.ai-card-body li{margin-bottom:4px}
-.ai-err{color:var(--rose);font-size:12px;margin-top:10px;padding:10px 14px;
-  background:rgba(255,85,119,.08);border-radius:8px;border:1px solid rgba(255,85,119,.2)}
-.ai-rerun{
-  background:var(--golddim);border:1px solid var(--gold);color:var(--gold);
+.aicard{background:var(--card2);border:1px solid var(--bdr);border-radius:12px;padding:14px 16px;
+  animation:fadeUp .4s ease backwards;transition:background .4s,border-color .4s}
+.aicard-h{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.aicard-ico{font-size:20px}
+.aicard-t{font-size:12px;font-weight:800;color:var(--txt);transition:color .4s}
+.aicard-body{font-size:12px;color:var(--txt2);line-height:1.7;transition:color .4s}
+.aicard-body ul{padding-left:16px}
+.aicard-body li{margin-bottom:4px}
+.ai-sum{margin:14px 0 4px;padding:12px 16px;background:rgba(176,111,255,.09);border-radius:10px;
+  border:1px solid rgba(176,111,255,.2);font-size:12px;color:var(--txt2);line-height:1.7;transition:color .4s}
+.ai-rerun{background:var(--gdim);border:1px solid var(--gold);color:var(--gold);
   padding:6px 14px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;
-  margin-top:12px;transition:background .2s;font-family:inherit;
-}
+  margin-top:12px;transition:background .2s;font-family:inherit}
 .ai-rerun:hover{background:rgba(200,168,69,.25)}
+.src-badge{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:99px;
+  font-size:11px;font-weight:600;background:rgba(48,217,136,.1);border:1px solid rgba(48,217,136,.3);color:#30d988}
 
-/* ══════════════════════════════════════
-   FOOTER
-══════════════════════════════════════ */
-footer{text-align:center;padding:14px 0 0;font-size:11px;color:var(--muted);border-top:1px solid var(--bdr);transition:color .4s,border-color .4s}
+footer{text-align:center;padding:14px 0;font-size:11px;color:var(--muted);border-top:1px solid var(--bdr);transition:color .4s,border-color .4s}
 
-/* ══════════════════════════════════════
-   RESPONSIVE
-══════════════════════════════════════ */
-@media(max-width:1200px){
-  .t5g{grid-template-columns:repeat(2,1fr)}
-  .chrow{grid-template-columns:1fr}
-  .kgrid{grid-template-columns:repeat(3,1fr)}
-}
+/* mobile bottom bar */
+.mbar{display:none}
 
-/* ── Tablet ── */
-@media(max-width:900px){
-  .kgrid{grid-template-columns:repeat(3,1fr)}
-  .brow{grid-template-columns:repeat(2,1fr)}
-}
-
-/* ── Mobile ── */
+/* responsive */
+@media(max-width:1200px){.t5g{grid-template-columns:repeat(2,1fr)}.chrow{grid-template-columns:1fr}.kgrid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:900px){.brow{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:768px){
-  /* header compact */
   header{padding:0 12px;height:56px}
-  .ht{font-size:12px;line-height:1.2}
-  .hs{display:none}
+  .ht{font-size:12px}.hs{display:none}
   #sbadge{display:none}
-  .hbtn span:last-child{display:none}
-  .hbtn{padding:6px 10px;font-size:13px}
+  .hbtn span:last-child{display:none}.hbtn{padding:6px 10px}
   .logo{width:32px;height:32px;font-size:15px;border-radius:8px}
-
-  /* main */
-  main{padding:12px 10px 80px}
-
-  /* filter: horizontal scroll rows */
+  main{padding:12px 10px 100px}
   .fbox{padding:10px 12px;border-radius:12px}
-  .frow{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;gap:7px;
-    padding-bottom:4px;scrollbar-width:none}
+  .frow{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;gap:7px;padding-bottom:4px;scrollbar-width:none}
   .frow::-webkit-scrollbar{display:none}
   .frow+.frow{margin-top:8px;padding-top:8px}
   .flbl{display:none}
   .pbtn,.mbtn,.abtn{flex-shrink:0;padding:7px 14px;font-size:12px;border-radius:8px}
-  .pbtn.on,.abtn.on{padding:7px 14px}
-
-  /* KPI: 2 cols */
   .kgrid{grid-template-columns:repeat(2,1fr);gap:9px}
-  .kcard{padding:14px 12px;border-radius:12px}
-  .ki{font-size:20px;margin-bottom:7px}
-  .kv{font-size:22px}
-  .kl{font-size:9px}
-  .ks{font-size:10px}
-
-  /* section header */
-  .shdr{margin:16px 0 10px}
-  .shdr h2{font-size:12px}
-
-  /* top 5: 1 col */
-  .t5g{grid-template-columns:1fr;gap:10px}
-  .t5{padding:14px;border-radius:12px}
-
-  /* charts stacked */
-  .chrow{grid-template-columns:1fr;gap:10px}
-  .chcard{padding:14px;border-radius:12px}
-  .chw{height:180px!important}
-
-  /* bottom row: 1 col */
-  .brow{grid-template-columns:1fr;gap:10px}
-  .mini{padding:14px;border-radius:12px}
-
-  /* rank items larger touch */
-  .ri{margin-bottom:11px}
-  .rb{width:24px;height:24px;font-size:11px}
-  .rn{font-size:12px}
-  .rc{font-size:12px}
-
-  /* footer */
-  footer{padding:10px 0}
-
-  /* sticky bottom bar for quick filter */
-  .bottom-bar{
-    display:flex;position:fixed;bottom:0;left:0;right:0;z-index:150;
-    background:var(--card);border-top:1px solid var(--bdr2);
-    backdrop-filter:blur(16px);padding:8px 10px 10px;
-    gap:6px;overflow-x:auto;-webkit-overflow-scrolling:touch;
-    box-shadow:0 -4px 20px rgba(0,0,0,0.3);
-    scrollbar-width:none;
-  }
-  .bottom-bar::-webkit-scrollbar{display:none}
-  .bottom-bar .pbtn{flex-shrink:0;padding:8px 14px;font-size:12px}
+  .kcard{padding:14px 12px;border-radius:12px}.ki{font-size:20px;margin-bottom:7px}.kv{font-size:22px}.kl{font-size:9px}.ks{font-size:10px}
+  .shdr{margin:16px 0 10px}.shdr h2{font-size:12px}
+  .t5g{grid-template-columns:1fr;gap:10px}.t5{padding:14px;border-radius:12px}
+  .chrow{grid-template-columns:1fr;gap:10px}.chcard{padding:14px;border-radius:12px}.chw{height:180px!important}
+  .brow{grid-template-columns:1fr;gap:10px}.mini{padding:14px;border-radius:12px}
+  .aibox{padding:14px}.ai-cards{grid-template-columns:1fr}
+  .mbar{display:flex;position:fixed;bottom:0;left:0;right:0;z-index:150;
+    background:var(--card);border-top:1px solid var(--bdr2);backdrop-filter:blur(16px);
+    padding:8px 10px 12px;gap:6px;overflow-x:auto;-webkit-overflow-scrolling:touch;
+    box-shadow:0 -4px 20px rgba(0,0,0,.3);scrollbar-width:none}
+  .mbar::-webkit-scrollbar{display:none}
+  .mbar .pbtn{flex-shrink:0;padding:8px 14px;font-size:12px}
 }
-
-/* AI mobile */
-@media(max-width:768px){
-  .ai-cards{grid-template-columns:1fr}
-  .ai-key-row{flex-direction:column;align-items:stretch}
-  .ai-run{width:100%;padding:11px}
-  .ai-input{min-width:unset}
-}
-
-/* ── Small phone ── */
-@media(max-width:400px){
-  .kgrid{grid-template-columns:1fr}
-  .kcard{padding:12px 10px}
-  .kv{font-size:20px}
-  .hbtn{padding:5px 8px}
-}
+@media(max-width:400px){.kgrid{grid-template-columns:1fr}.kv{font-size:20px}}
 </style>
 </head>
 <body>
 
-<!-- OVERLAY -->
-<div class="ov" id="ov">
-  <div class="ov-ico">⚕️</div>
-  <div class="ov-txt">กำลังโหลดข้อมูล…</div>
-  <div class="ov-sub">กรุณารอสักครู่</div>
-</div>
+<div class="ov" id="ov"><div class="ov-ico">⚕️</div><div class="ov-txt">กำลังโหลดข้อมูล…</div><div class="ov-sub">กรุณารอสักครู่</div></div>
 
-<!-- HEADER -->
 <header>
   <div class="hl">
     <div class="logo">⚕️</div>
-    <div>
-      <div class="ht">รายงานการใช้บริการห้องพยาบาล</div>
-      <div class="hs">Health Room Analytics Dashboard</div>
-    </div>
+    <div><div class="ht">รายงานการใช้บริการห้องพยาบาล</div><div class="hs">Health Room Analytics Dashboard</div></div>
   </div>
   <div class="hr">
     <div id="sbadge"><div class="dot" id="dot"></div><span id="stxt">กำลังโหลด…</span></div>
     <button class="hbtn" onclick="toggleTheme()"><span id="thico">☀️</span><span id="thlbl">สว่าง</span></button>
-    <button class="hbtn" onclick="loadData()"><span class="spin" id="rico">↻</span> รีเฟรช</button>
+    <button class="hbtn" onclick="loadData()"><span class="sp" id="rico">↻</span> <span>รีเฟรช</span></button>
   </div>
 </header>
 
 <main>
 
-<!-- FILTER -->
 <div class="fbox">
   <div class="frow">
     <div class="flbl">⏱ ช่วงเวลา</div>
@@ -520,133 +301,76 @@ footer{text-align:center;padding:14px 0 0;font-size:11px;color:var(--muted);bord
   <div class="frow">
     <div class="flbl">📍 พื้นที่</div>
     <div class="fbtns">
-      <button class="abtn on" onclick="setArea('all',this)">ทั้งหมด</button>
-      <button class="abtn"    onclick="setArea('บางบ่อ',this)">📍 บางบ่อ</button>
-      <button class="abtn"    onclick="setArea('คลองเจ้า',this)">📍 คลองเจ้า</button>
+      <button class="abtn on" onclick="setA('all',this)">ทั้งหมด</button>
+      <button class="abtn"    onclick="setA('บางบ่อ',this)">📍 บางบ่อ</button>
+      <button class="abtn"    onclick="setA('คลองเจ้า',this)">📍 คลองเจ้า</button>
     </div>
   </div>
   <div class="frow">
     <div class="flbl">📅 เดือน</div>
     <div class="fbtns">
-      <button class="mbtn" data-m="มกราคม"    onclick="setF('มกราคม',this)">ม.ค.</button>
-      <button class="mbtn" data-m="กุมภาพันธ์" onclick="setF('กุมภาพันธ์',this)">ก.พ.</button>
-      <button class="mbtn" data-m="มีนาคม"    onclick="setF('มีนาคม',this)">มี.ค.</button>
-      <button class="mbtn" data-m="เมษายน"    onclick="setF('เมษายน',this)">เม.ย.</button>
-      <button class="mbtn" data-m="พฤษภาคม"  onclick="setF('พฤษภาคม',this)">พ.ค.</button>
-      <button class="mbtn" data-m="มิถุนายน"  onclick="setF('มิถุนายน',this)">มิ.ย.</button>
-      <button class="mbtn dim" data-m="กรกฎาคม"  onclick="setF('กรกฎาคม',this)">ก.ค.</button>
-      <button class="mbtn dim" data-m="สิงหาคม"   onclick="setF('สิงหาคม',this)">ส.ค.</button>
-      <button class="mbtn dim" data-m="กันยายน"   onclick="setF('กันยายน',this)">ก.ย.</button>
-      <button class="mbtn dim" data-m="ตุลาคม"    onclick="setF('ตุลาคม',this)">ต.ค.</button>
-      <button class="mbtn dim" data-m="พฤศจิกายน" onclick="setF('พฤศจิกายน',this)">พ.ย.</button>
-      <button class="mbtn dim" data-m="ธันวาคม"   onclick="setF('ธันวาคม',this)">ธ.ค.</button>
+      <button class="mbtn" onclick="setF('มกราคม',this)">ม.ค.</button>
+      <button class="mbtn" onclick="setF('กุมภาพันธ์',this)">ก.พ.</button>
+      <button class="mbtn" onclick="setF('มีนาคม',this)">มี.ค.</button>
+      <button class="mbtn" onclick="setF('เมษายน',this)">เม.ย.</button>
+      <button class="mbtn" onclick="setF('พฤษภาคม',this)">พ.ค.</button>
+      <button class="mbtn" onclick="setF('มิถุนายน',this)">มิ.ย.</button>
+      <button class="mbtn dim">ก.ค.</button>
+      <button class="mbtn dim">ส.ค.</button>
+      <button class="mbtn dim">ก.ย.</button>
+      <button class="mbtn dim">ต.ค.</button>
+      <button class="mbtn dim">พ.ย.</button>
+      <button class="mbtn dim">ธ.ค.</button>
     </div>
   </div>
 </div>
 
-<!-- KPI -->
 <div class="kgrid">
-  <div class="kcard k-gold" style="animation-delay:.05s">
-    <div class="ki">📊</div><div class="kl">ครั้งที่เข้าใช้บริการ</div>
-    <div class="kv" id="kv-total">—</div><div class="ks">รายการทั้งหมด</div>
-  </div>
-  <div class="kcard k-blue" style="animation-delay:.09s">
-    <div class="ki">👤</div><div class="kl">พนักงานที่มาใช้บริการ</div>
-    <div class="kv" id="kv-emp">—</div><div class="ks">คนไม่ซ้ำกัน (โดยประมาณ)</div>
-  </div>
-  <div class="kcard k-rose" style="animation-delay:.13s">
-    <div class="ki">⚧️</div><div class="kl">หญิง / ชาย</div>
-    <div class="kv" id="kv-gen">—</div><div class="ks" id="ks-gen">สัดส่วนเพศ</div>
-  </div>
-  <div class="kcard k-grn" style="animation-delay:.17s">
-    <div class="ki">🏥</div><div class="kl">อาการที่พบบ่อยที่สุด</div>
-    <div class="kv" style="font-size:14px;line-height:1.35;padding-top:3px" id="kv-sym">—</div>
-    <div class="ks" id="ks-sym">—</div>
-  </div>
-  <div class="kcard k-pur" style="animation-delay:.21s">
-    <div class="ki">💊</div><div class="kl">ยาที่เบิกมากที่สุด</div>
-    <div class="kv" style="font-size:18px;padding-top:4px" id="kv-med">—</div>
-    <div class="ks" id="ks-med">—</div>
-  </div>
+  <div class="kcard k0" style="animation-delay:.05s"><div class="ki">📊</div><div class="kl">ครั้งที่เข้าใช้บริการ</div><div class="kv" id="kv0">—</div><div class="ks">รายการทั้งหมด</div></div>
+  <div class="kcard k1" style="animation-delay:.09s"><div class="ki">👤</div><div class="kl">พนักงานที่มาใช้บริการ</div><div class="kv" id="kv1">—</div><div class="ks">คน (โดยประมาณ)</div></div>
+  <div class="kcard k2" style="animation-delay:.13s"><div class="ki">⚧️</div><div class="kl">หญิง / ชาย</div><div class="kv" id="kv2" style="font-size:18px">—</div><div class="ks" id="ks2">สัดส่วนเพศ</div></div>
+  <div class="kcard k3" style="animation-delay:.17s"><div class="ki">🏥</div><div class="kl">อาการที่พบบ่อยที่สุด</div><div class="kv" id="kv3" style="font-size:15px;line-height:1.3;padding-top:2px">—</div><div class="ks" id="ks3">—</div></div>
+  <div class="kcard k4" style="animation-delay:.21s"><div class="ki">💊</div><div class="kl">ยาที่เบิกมากที่สุด</div><div class="kv" id="kv4" style="font-size:17px;padding-top:2px">—</div><div class="ks" id="ks4">—</div></div>
 </div>
 
-<!-- TOP 5 -->
 <div class="shdr" style="animation-delay:.08s"><h2>🏆 Top 5 อันดับ</h2><div class="shdr-line"></div></div>
 <div class="t5g">
-  <div class="t5" style="animation-delay:.1s">
-    <div class="t5h"><div class="t5i io">🩺</div><div><div class="t5t">Top 5 อาการ</div><div class="t5s">อาการที่พบบ่อยที่สุด</div></div></div>
-    <div id="ls"></div>
-  </div>
-  <div class="t5" style="animation-delay:.14s">
-    <div class="t5h"><div class="t5i ib">💊</div><div><div class="t5t">Top 5 ยา</div><div class="t5s">เวชภัณฑ์ที่เบิกจ่ายสูงสุด</div></div></div>
-    <div id="lm"></div>
-  </div>
-  <div class="t5" style="animation-delay:.18s">
-    <div class="t5h"><div class="t5i it">🧬</div><div><div class="t5t">Top 5 กลุ่มยา</div><div class="t5s">ประเภทกลุ่มยาที่ใช้สูงสุด</div></div></div>
-    <div id="lg"></div>
-  </div>
-  <div class="t5" style="animation-delay:.22s">
-    <div class="t5h"><div class="t5i ip">🕐</div><div><div class="t5t">ช่วงเวลา</div><div class="t5s">ช่วงที่มาใช้บริการมากที่สุด</div></div></div>
-    <div id="lt"></div>
-  </div>
+  <div class="t5" style="animation-delay:.1s"><div class="t5h"><div class="t5i io">🩺</div><div><div class="t5t">Top 5 อาการ</div><div class="t5s">อาการที่พบบ่อยที่สุด</div></div></div><div id="ls"></div></div>
+  <div class="t5" style="animation-delay:.14s"><div class="t5h"><div class="t5i ib">💊</div><div><div class="t5t">Top 5 ยา</div><div class="t5s">เวชภัณฑ์ที่เบิกจ่ายสูงสุด</div></div></div><div id="lm"></div></div>
+  <div class="t5" style="animation-delay:.18s"><div class="t5h"><div class="t5i it">🧬</div><div><div class="t5t">Top 5 กลุ่มยา</div><div class="t5s">ประเภทกลุ่มยาที่ใช้สูงสุด</div></div></div><div id="lg"></div></div>
+  <div class="t5" style="animation-delay:.22s"><div class="t5h"><div class="t5i ip">🕐</div><div><div class="t5t">ช่วงเวลา</div><div class="t5s">ช่วงที่มาใช้บริการมากที่สุด</div></div></div><div id="lt"></div></div>
 </div>
 
-<!-- CHARTS -->
 <div class="shdr" style="animation-delay:.14s"><h2>📈 แนวโน้มรายเดือน</h2><div class="shdr-line"></div></div>
 <div class="chrow">
-  <div class="chcard" style="animation-delay:.16s">
-    <div class="cht">จำนวนการเข้าใช้บริการรายเดือน</div>
-    <div class="chs">Monthly Visit Trend</div>
-    <div class="chw" style="height:210px"><canvas id="cbar"></canvas></div>
-  </div>
-  <div class="chcard" style="animation-delay:.2s">
-    <div class="cht">สัดส่วนกลุ่มยา</div>
-    <div class="chs">Medicine Group Distribution</div>
-    <div class="chw" style="height:210px"><canvas id="cdonut"></canvas></div>
-  </div>
+  <div class="chcard" style="animation-delay:.16s"><div class="cht">จำนวนการเข้าใช้บริการรายเดือน</div><div class="chs">Monthly Visit Trend</div><div class="chw" style="height:210px"><canvas id="cbar"></canvas></div></div>
+  <div class="chcard" style="animation-delay:.2s"><div class="cht">สัดส่วนกลุ่มยา</div><div class="chs">Medicine Group Distribution</div><div class="chw" style="height:210px"><canvas id="cdonut"></canvas></div></div>
 </div>
 
-<!-- BOTTOM -->
 <div class="shdr" style="animation-delay:.18s"><h2>📋 ข้อมูลเพิ่มเติม</h2><div class="shdr-line"></div></div>
 <div class="brow">
   <div class="mini" style="animation-delay:.2s">
     <div class="mt">เพศ</div><div class="ms">Gender Breakdown</div>
-    <div class="gr"><div class="gh"><span class="gl">👩 หญิง</span><span class="gc" id="gfc">—</span></div>
-      <div class="gbg"><div class="gfill gf" id="gfb"></div></div><div class="gp" id="gfp"></div></div>
-    <div class="gr"><div class="gh"><span class="gl">👨 ชาย</span><span class="gc" id="gmc">—</span></div>
-      <div class="gbg"><div class="gfill gm" id="gmb"></div></div><div class="gp" id="gmp"></div></div>
+    <div class="gr"><div class="gh"><span class="gl">👩 หญิง</span><span class="gc" id="gfc">—</span></div><div class="gbg"><div class="gfill gf" id="gfb"></div></div><div class="gp" id="gfp"></div></div>
+    <div class="gr"><div class="gh"><span class="gl">👨 ชาย</span><span class="gc" id="gmc">—</span></div><div class="gbg"><div class="gfill gm" id="gmb"></div></div><div class="gp" id="gmp"></div></div>
   </div>
-  <div class="mini" style="animation-delay:.24s">
-    <div class="mt">พื้นที่</div><div class="ms">Location Distribution</div>
-    <div id="awrap"></div>
-  </div>
+  <div class="mini" style="animation-delay:.24s"><div class="mt">พื้นที่</div><div class="ms">Location Distribution</div><div id="awrap"></div></div>
   <div class="mini" style="animation-delay:.28s">
     <div class="mt">สรุปข้อมูล</div><div class="ms">Summary Statistics</div>
     <div style="display:flex;flex-direction:column;gap:7px" id="sumlist"></div>
   </div>
 </div>
 
-<!-- AI SECTION -->
 <div class="shdr" style="animation-delay:.22s"><h2>🤖 AI แนะนำกิจกรรม</h2><div class="shdr-line"></div></div>
-<div class="ai-box" style="animation-delay:.24s">
-  <div class="ai-top">
-    <div class="ai-meta">
-      <div class="ai-title">✨ วิเคราะห์สุขภาพพนักงานอัตโนมัติ</div>
-      <div class="ai-sub">ระบบวิเคราะห์อาการ ยา และพฤติกรรมการมาใช้บริการในช่วงที่เลือก<br>แล้วแนะนำกิจกรรมและโปรแกรมสุขภาพที่เหมาะสม</div>
-      <div class="ai-key-row">
-        <button class="ai-run" id="ai-run-btn" onclick="runAI()">🔍 วิเคราะห์และแนะนำกิจกรรม</button>
-      </div>
-    </div>
-  </div>
-  <div class="ai-loading" id="ai-loading">
-    <div class="dot3"><span></span><span></span><span></span></div>
-    <span>กำลังวิเคราะห์ข้อมูลสุขภาพ…</span>
-  </div>
+<div class="aibox" style="animation-delay:.24s">
+  <div class="ai-title">✨ วิเคราะห์สุขภาพพนักงานอัตโนมัติ</div>
+  <div class="ai-sub">ระบบวิเคราะห์อาการ ยา และพฤติกรรมการมาใช้บริการในช่วงที่เลือก แล้วแนะนำกิจกรรมที่เหมาะสม</div>
+  <button class="ai-btn" id="ai-btn" onclick="runAI()">🔍 วิเคราะห์และแนะนำกิจกรรม</button>
+  <div class="ai-ld" id="ai-ld"><div class="d3"><span></span><span></span><span></span></div><span>กำลังวิเคราะห์ข้อมูลสุขภาพ…</span></div>
   <div id="ai-result"></div>
 </div>
 
-<!-- MOBILE BOTTOM BAR (quick period filter) -->
-<div class="bottom-bar" id="mobb">
+<div class="mbar" id="mbar">
   <button class="pbtn on" onclick="setFM('all',this)">ทั้งหมด</button>
   <button class="pbtn"    onclick="setFM('1m',this)">1 เดือน</button>
   <button class="pbtn"    onclick="setFM('3m',this)">3 เดือน</button>
@@ -654,99 +378,72 @@ footer{text-align:center;padding:14px 0 0;font-size:11px;color:var(--muted);bord
   <button class="pbtn"    onclick="setFM('12m',this)">12 เดือน</button>
 </div>
 
-<footer>
-  <span id="srcbadge"></span>&nbsp;&nbsp;·&nbsp;&nbsp;<span id="fttime">—</span>
-</footer>
+<footer><span id="srcbadge"></span>&nbsp;·&nbsp;<span id="fttime">—</span></footer>
 </main>
 
 <script>
-/* ══════════════════════════════════════
-   EMBEDDED REAL DATA (1,481 รายการจริง)
-══════════════════════════════════════ */
-const RD = {"มกราคม":{"total":322,"uniq":146,"sym":[["ปวดศีรษะ",52],["ไอ/เจ็บคอ",43],["คัดจมูก/น้ำมูกไหล",35],["ท้องอืด/แน่นท้อง",35],["แผลถลอก/แผลสด",27],["ปวดกล้ามเนื้อ/ปวดหลัง",23],["ไข้หวัด",21],["ถ่ายเหลว/ปวดบิดท้อง",18],["เวียนศีรษะ",11],["ผื่นคัน/ลมพิษ",8]],"med":[["CETIRIZINE",52],["IBUPROFEN",39],["TRINOLONE",35],["BISOLVON",23],["TYLENOL",23],["AIR-X",19],["ENO",14],["DECOLGEN",13],["COUNTERPAIN",12],["CA-R-BON",11]],"grp":[["กลุ่มระบบทางเดินหายใจ",105],["กลุ่มแก้ปวด/ลดไข้",66],["กลุ่มยาใช้ภายนอก",61],["กลุ่มระบบทางเดินอาหาร",57],["อุปกรณ์ปฐมพยาบาล",19],["กลุ่มยาตา",7],["กลุ่มแก้เวียนศีรษะ",4],["กลุ่มยาฆ่าเชื้อ",3]],"time":[["ช่วงเช้า (06:00–11:59)",145],["ช่วงบ่าย (13:00–15:59)",125],["ช่วงเที่ยง (12:00–12:59)",39],["ช่วงเย็น (16:00–17:59)",13]],"gender":{"F":235,"M":87},"area":[["บางบ่อ",238],["คลองเจ้า",84]]},"กุมภาพันธ์":{"total":259,"uniq":123,"sym":[["ปวดกล้ามเนื้อ/ปวดหลัง",32],["ท้องอืด/แน่นท้อง",29],["ปวดศีรษะ",29],["ไอ/เจ็บคอ",28],["แผลถลอก/แผลสด",21],["ถ่ายเหลว/ปวดบิดท้อง",20],["คัดจมูก/น้ำมูกไหล",17],["เวียนศีรษะ",15],["ปวดท้องประจำเดือน",15],["ผื่นคัน/ลมพิษ",8]],"med":[["IBUPROFEN",31],["COUNTERPAIN",23],["BISOLVON",21],["MA-WAENG",21],["TYLENOL",19],["DRAMAMINE",16],["CETIRIZINE",15],["CA-R-BON",12],["PARA",12],["AIR-X",11]],"grp":[["กลุ่มระบบทางเดินหายใจ",68],["กลุ่มแก้ปวด/ลดไข้",62],["กลุ่มระบบทางเดินอาหาร",50],["กลุ่มยาใช้ภายนอก",36],["อุปกรณ์ปฐมพยาบาล",19],["กลุ่มแก้เวียนศีรษะ",17],["กลุ่มยาตา",6],["กลุ่มยาฆ่าเชื้อ",1]],"time":[["ช่วงเช้า (06:00–11:59)",149],["ช่วงบ่าย (13:00–15:59)",79],["ช่วงเที่ยง (12:00–12:59)",19],["ช่วงเย็น (16:00–17:59)",12]],"gender":{"F":190,"M":69},"area":[["บางบ่อ",164],["คลองเจ้า",95]]},"มีนาคม":{"total":287,"uniq":127,"sym":[["ปวดศีรษะ",53],["ปวดกล้ามเนื้อ/ปวดหลัง",33],["แผลถลอก/แผลสด",31],["ไอ/เจ็บคอ",30],["ถ่ายเหลว/ปวดบิดท้อง",17],["เวียนศีรษะ",16],["ท้องอืด/แน่นท้อง",15],["คัดจมูก/น้ำมูกไหล",14],["ผื่นคัน/ลมพิษ",13],["ไข้หวัด",6]],"med":[["TYLENOL",63],["IBUPROFEN",34],["COUNTERPAIN",20],["CETIRIZINE",20],["DRESSING WOUND PACK",19],["BISOLVON",17],["ATARAX",12],["ENO",10],["BUSCOPAN",9],["STUGERON",7]],"grp":[["กลุ่มแก้ปวด/ลดไข้",104],["กลุ่มระบบทางเดินหายใจ",59],["กลุ่มยาใช้ภายนอก",37],["กลุ่มระบบทางเดินอาหาร",37],["อุปกรณ์ปฐมพยาบาล",26],["กลุ่มแก้เวียนศีรษะ",12],["กลุ่มยาตา",11],["กลุ่มยาฆ่าเชื้อ",1]],"time":[["ช่วงเช้า (06:00–11:59)",172],["ช่วงบ่าย (13:00–15:59)",71],["ช่วงเย็น (16:00–17:59)",35],["ช่วงเที่ยง (12:00–12:59)",9]],"gender":{"F":196,"M":91},"area":[["บางบ่อ",177],["คลองเจ้า",110]]},"เมษายน":{"total":285,"uniq":136,"sym":[["ปวดศีรษะ",49],["ปวดกล้ามเนื้อ/ปวดหลัง",32],["ท้องอืด/แน่นท้อง",30],["แผลถลอก/แผลสด",22],["เวียนศีรษะ",20],["ไอ/เจ็บคอ",20],["ถ่ายเหลว/ปวดบิดท้อง",19],["ผื่นคัน/ลมพิษ",17],["ปวดท้องประจำเดือน",10],["ไข้หวัด",8]],"med":[["IBUPROFEN",48],["TYLENOL",35],["BUSCOPAN",19],["COUNTERPAIN",18],["DRAMAMINE",16],["ATARAX",15],["CETIRIZINE",14],["ENO",13],["DRESSING WOUND PACK",13],["BISOLVON",13]],"grp":[["กลุ่มแก้ปวด/ลดไข้",91],["กลุ่มระบบทางเดินอาหาร",55],["กลุ่มระบบทางเดินหายใจ",46],["กลุ่มยาใช้ภายนอก",39],["อุปกรณ์ปฐมพยาบาล",21],["กลุ่มแก้เวียนศีรษะ",18],["กลุ่มยาตา",14],["กลุ่มยาฆ่าเชื้อ",1]],"time":[["ช่วงเช้า (06:00–11:59)",165],["ช่วงบ่าย (13:00–15:59)",91],["ช่วงเที่ยง (12:00–12:59)",21],["ช่วงเย็น (16:00–17:59)",8]],"gender":{"F":209,"M":76},"area":[["บางบ่อ",155],["คลองเจ้า",130]]},"พฤษภาคม":{"total":320,"uniq":140,"sym":[["ปวดศีรษะ",50],["แผลถลอก/แผลสด",44],["ท้องอืด/แน่นท้อง",34],["ไอ/เจ็บคอ",24],["ปวดกล้ามเนื้อ/ปวดหลัง",23],["ผื่นคัน/ลมพิษ",18],["เวียนศีรษะ",17],["ถ่ายเหลว/ปวดบิดท้อง",15],["คัดจมูก/น้ำมูกไหล",14],["ปวดท้องประจำเดือน",11]],"med":[["IBUPROFEN",50],["ATARAX",33],["TYLENOL",33],["DRESSING WOUND PACK",32],["PARA",22],["BISOLVON",16],["WHITE MIXT",14],["ENO",12],["COUNTERPAIN",11],["AIR-X",10]],"grp":[["กลุ่มแก้ปวด/ลดไข้",105],["กลุ่มระบบทางเดินหายใจ",67],["กลุ่มระบบทางเดินอาหาร",60],["อุปกรณ์ปฐมพยาบาล",41],["กลุ่มยาใช้ภายนอก",27],["กลุ่มแก้เวียนศีรษะ",11],["กลุ่มยาตา",7],["กลุ่มยาฆ่าเชื้อ",2]],"time":[["ช่วงเช้า (06:00–11:59)",180],["ช่วงบ่าย (13:00–15:59)",106],["ช่วงเที่ยง (12:00–12:59)",30],["ช่วงเย็น (16:00–17:59)",4]],"gender":{"F":235,"M":85},"area":[["บางบ่อ",196],["คลองเจ้า",124]]},"มิถุนายน":{"total":1,"uniq":1,"sym":[["ท้องอืด/แน่นท้อง",1]],"med":[["ENO",1]],"grp":[["กลุ่มระบบทางเดินอาหาร",1]],"time":[["ช่วงบ่าย (13:00–15:59)",1]],"gender":{"F":1},"area":[["คลองเจ้า",1]]},"__all__":{"total":1481,"uniq":319,"sym":[["ปวดศีรษะ",234],["แผลถลอก/แผลสด",147],["ท้องอืด/แน่นท้อง",145],["ไอ/เจ็บคอ",145],["ปวดกล้ามเนื้อ/ปวดหลัง",143],["ถ่ายเหลว/ปวดบิดท้อง",89],["คัดจมูก/น้ำมูกไหล",85],["เวียนศีรษะ",79],["ผื่นคัน/ลมพิษ",60],["ไข้หวัด",41]],"med":[["IBUPROFEN",202],["TYLENOL",174],["CETIRIZINE",107],["BISOLVON",90],["COUNTERPAIN",84],["DRESSING WOUND PACK",78],["ATARAX",69],["ENO",61],["TRINOLONE",55],["PARA",52]],"grp":[["กลุ่มแก้ปวด/ลดไข้",429],["กลุ่มระบบทางเดินหายใจ",345],["กลุ่มระบบทางเดินอาหาร",261],["กลุ่มยาใช้ภายนอก",201],["อุปกรณ์ปฐมพยาบาล",128],["กลุ่มแก้เวียนศีรษะ",62],["กลุ่มยาตา",47],["กลุ่มยาฆ่าเชื้อ",8]],"time":[["ช่วงเช้า (06:00–11:59)",815],["ช่วงบ่าย (13:00–15:59)",476],["ช่วงเที่ยง (12:00–12:59)",118],["ช่วงเย็น (16:00–17:59)",72]],"gender":{"F":1069,"M":412},"area":[["บางบ่อ",936],["คลองเจ้า",545]]}};
+/* ── REAL DATA ── */
+const RD = {"มกราคม":{"total":322,"uniq":146,"sym":[["ปวดศีรษะ",52],["ไอ/เจ็บคอ",43],["คัดจมูก/น้ำมูกไหล",35],["ท้องอืด/แน่นท้อง",35],["แผลถลอก/แผลสด",27],["ปวดกล้ามเนื้อ/ปวดหลัง",23],["ไข้หวัด",21],["ถ่ายเหลว/ปวดบิดท้อง",18],["เวียนศีรษะ",11],["ผื่นคัน/ลมพิษ",8]],"med":[["CETIRIZINE",52],["IBUPROFEN",39],["TRINOLONE",35],["BISOLVON",23],["TYLENOL",23],["AIR-X",19],["ENO",14],["DECOLGEN",13],["COUNTERPAIN",12],["CA-R-BON",11]],"grp":[["กลุ่มระบบทางเดินหายใจ",105],["กลุ่มแก้ปวด/ลดไข้",66],["กลุ่มยาใช้ภายนอก",61],["กลุ่มระบบทางเดินอาหาร",57],["อุปกรณ์ปฐมพยาบาล",19],["กลุ่มยาตา",7],["กลุ่มแก้เวียนศีรษะ",4],["กลุ่มยาฆ่าเชื้อ",3]],"time":[["ช่วงเช้า (06:00–11:59)",145],["ช่วงบ่าย (13:00–15:59)",125],["ช่วงเที่ยง (12:00–12:59)",39],["ช่วงเย็น (16:00–17:59)",13]],"gender":{"F":235,"M":87},"area":[["บางบ่อ",238],["คลองเจ้า",84]]},"กุมภาพันธ์":{"total":259,"uniq":123,"sym":[["ปวดกล้ามเนื้อ/ปวดหลัง",32],["ท้องอืด/แน่นท้อง",29],["ปวดศีรษะ",29],["ไอ/เจ็บคอ",28],["แผลถลอก/แผลสด",21],["ถ่ายเหลว/ปวดบิดท้อง",20],["คัดจมูก/น้ำมูกไหล",17],["เวียนศีรษะ",15],["ปวดท้องประจำเดือน",15],["ผื่นคัน/ลมพิษ",8]],"med":[["IBUPROFEN",31],["COUNTERPAIN",23],["BISOLVON",21],["MA-WAENG",21],["TYLENOL",19],["DRAMAMINE",16],["CETIRIZINE",15],["CA-R-BON",12],["PARA",12],["AIR-X",11]],"grp":[["กลุ่มระบบทางเดินหายใจ",68],["กลุ่มแก้ปวด/ลดไข้",62],["กลุ่มระบบทางเดินอาหาร",50],["กลุ่มยาใช้ภายนอก",36],["อุปกรณ์ปฐมพยาบาล",19],["กลุ่มแก้เวียนศีรษะ",17],["กลุ่มยาตา",6],["กลุ่มยาฆ่าเชื้อ",1]],"time":[["ช่วงเช้า (06:00–11:59)",149],["ช่วงบ่าย (13:00–15:59)",79],["ช่วงเที่ยง (12:00–12:59)",19],["ช่วงเย็น (16:00–17:59)",12]],"gender":{"F":190,"M":69},"area":[["บางบ่อ",164],["คลองเจ้า",95]]},"มีนาคม":{"total":287,"uniq":127,"sym":[["ปวดศีรษะ",53],["ปวดกล้ามเนื้อ/ปวดหลัง",33],["แผลถลอก/แผลสด",31],["ไอ/เจ็บคอ",30],["ถ่ายเหลว/ปวดบิดท้อง",17],["เวียนศีรษะ",16],["ท้องอืด/แน่นท้อง",15],["คัดจมูก/น้ำมูกไหล",14],["ผื่นคัน/ลมพิษ",13],["ไข้หวัด",6]],"med":[["TYLENOL",63],["IBUPROFEN",34],["COUNTERPAIN",20],["CETIRIZINE",20],["DRESSING WOUND PACK",19],["BISOLVON",17],["ATARAX",12],["ENO",10],["BUSCOPAN",9],["STUGERON",7]],"grp":[["กลุ่มแก้ปวด/ลดไข้",104],["กลุ่มระบบทางเดินหายใจ",59],["กลุ่มยาใช้ภายนอก",37],["กลุ่มระบบทางเดินอาหาร",37],["อุปกรณ์ปฐมพยาบาล",26],["กลุ่มแก้เวียนศีรษะ",12],["กลุ่มยาตา",11],["กลุ่มยาฆ่าเชื้อ",1]],"time":[["ช่วงเช้า (06:00–11:59)",172],["ช่วงบ่าย (13:00–15:59)",71],["ช่วงเย็น (16:00–17:59)",35],["ช่วงเที่ยง (12:00–12:59)",9]],"gender":{"F":196,"M":91},"area":[["บางบ่อ",177],["คลองเจ้า",110]]},"เมษายน":{"total":285,"uniq":136,"sym":[["ปวดศีรษะ",49],["ปวดกล้ามเนื้อ/ปวดหลัง",32],["ท้องอืด/แน่นท้อง",30],["แผลถลอก/แผลสด",22],["เวียนศีรษะ",20],["ไอ/เจ็บคอ",20],["ถ่ายเหลว/ปวดบิดท้อง",19],["ผื่นคัน/ลมพิษ",17],["ปวดท้องประจำเดือน",10],["ไข้หวัด",8]],"med":[["IBUPROFEN",48],["TYLENOL",35],["BUSCOPAN",19],["COUNTERPAIN",18],["DRAMAMINE",16],["ATARAX",15],["CETIRIZINE",14],["ENO",13],["DRESSING WOUND PACK",13],["BISOLVON",13]],"grp":[["กลุ่มแก้ปวด/ลดไข้",91],["กลุ่มระบบทางเดินอาหาร",55],["กลุ่มระบบทางเดินหายใจ",46],["กลุ่มยาใช้ภายนอก",39],["อุปกรณ์ปฐมพยาบาล",21],["กลุ่มแก้เวียนศีรษะ",18],["กลุ่มยาตา",14],["กลุ่มยาฆ่าเชื้อ",1]],"time":[["ช่วงเช้า (06:00–11:59)",165],["ช่วงบ่าย (13:00–15:59)",91],["ช่วงเที่ยง (12:00–12:59)",21],["ช่วงเย็น (16:00–17:59)",8]],"gender":{"F":209,"M":76},"area":[["บางบ่อ",155],["คลองเจ้า",130]]},"พฤษภาคม":{"total":320,"uniq":140,"sym":[["ปวดศีรษะ",50],["แผลถลอก/แผลสด",44],["ท้องอืด/แน่นท้อง",34],["ไอ/เจ็บคอ",24],["ปวดกล้ามเนื้อ/ปวดหลัง",23],["ผื่นคัน/ลมพิษ",18],["เวียนศีรษะ",17],["ถ่ายเหลว/ปวดบิดท้อง",15],["คัดจมูก/น้ำมูกไหล",14],["ปวดท้องประจำเดือน",11]],"med":[["IBUPROFEN",50],["ATARAX",33],["TYLENOL",33],["DRESSING WOUND PACK",32],["PARA",22],["BISOLVON",16],["WHITE MIXT",14],["ENO",12],["COUNTERPAIN",11],["AIR-X",10]],"grp":[["กลุ่มแก้ปวด/ลดไข้",105],["กลุ่มระบบทางเดินหายใจ",67],["กลุ่มระบบทางเดินอาหาร",60],["อุปกรณ์ปฐมพยาบาล",41],["กลุ่มยาใช้ภายนอก",27],["กลุ่มแก้เวียนศีรษะ",11],["กลุ่มยาตา",7],["กลุ่มยาฆ่าเชื้อ",2]],"time":[["ช่วงเช้า (06:00–11:59)",180],["ช่วงบ่าย (13:00–15:59)",106],["ช่วงเที่ยง (12:00–12:59)",30],["ช่วงเย็น (16:00–17:59)",4]],"gender":{"F":235,"M":85},"area":[["บางบ่อ",196],["คลองเจ้า",124]]},"มิถุนายน":{"total":1,"uniq":1,"sym":[["ท้องอืด/แน่นท้อง",1]],"med":[["ENO",1]],"grp":[["กลุ่มระบบทางเดินอาหาร",1]],"time":[["ช่วงบ่าย (13:00–15:59)",1]],"gender":{"F":1,"M":0},"area":[["คลองเจ้า",1]]},"__all__":{"total":1481,"uniq":319,"sym":[["ปวดศีรษะ",234],["แผลถลอก/แผลสด",147],["ท้องอืด/แน่นท้อง",145],["ไอ/เจ็บคอ",145],["ปวดกล้ามเนื้อ/ปวดหลัง",143],["ถ่ายเหลว/ปวดบิดท้อง",89],["คัดจมูก/น้ำมูกไหล",85],["เวียนศีรษะ",79],["ผื่นคัน/ลมพิษ",60],["ไข้หวัด",41]],"med":[["IBUPROFEN",202],["TYLENOL",174],["CETIRIZINE",107],["BISOLVON",90],["COUNTERPAIN",84],["DRESSING WOUND PACK",78],["ATARAX",69],["ENO",61],["TRINOLONE",55],["PARA",52]],"grp":[["กลุ่มแก้ปวด/ลดไข้",429],["กลุ่มระบบทางเดินหายใจ",345],["กลุ่มระบบทางเดินอาหาร",261],["กลุ่มยาใช้ภายนอก",201],["อุปกรณ์ปฐมพยาบาล",128],["กลุ่มแก้เวียนศีรษะ",62],["กลุ่มยาตา",47],["กลุ่มยาฆ่าเชื้อ",8]],"time":[["ช่วงเช้า (06:00–11:59)",815],["ช่วงบ่าย (13:00–15:59)",476],["ช่วงเที่ยง (12:00–12:59)",118],["ช่วงเย็น (16:00–17:59)",72]],"gender":{"F":1069,"M":412},"area":[["บางบ่อ",936],["คลองเจ้า",545]]}};
 
-/* ══════════════════════════════════════
-   STATE & CONSTANTS
-══════════════════════════════════════ */
-const SHEET_ID = '1Apibk0d_e3hbNuy7XvA4EBBKnMuM7xl-wfR26VB4fu8';
-const CSV_URL  = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/pub?output=csv`;
-const TH_MO    = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
-const TH_SH    = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+const TH_MO=['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+const TH_SH=['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+const CSV='https://docs.google.com/spreadsheets/d/1Apibk0d_e3hbNuy7XvA4EBBKnMuM7xl-wfR26VB4fu8/pub?output=csv';
 
-let FILTER='all', AREA='all', mChart=null, dChart=null, isDark=true, SRC='embedded';
+let FILTER='all', AREA='all', mCh=null, dCh=null, isDark=true, SRC='embedded';
 
-/* ══════════════════════════════════════
-   THEME
-══════════════════════════════════════ */
+/* ── THEME ── */
 function toggleTheme(){
   isDark=!isDark;
   document.documentElement.dataset.theme=isDark?'dark':'light';
   document.getElementById('thico').textContent=isDark?'☀️':'🌙';
   document.getElementById('thlbl').textContent=isDark?'สว่าง':'มืด';
-  render(getData());
+  const d=getData();if(d)render(d);
 }
 
-/* ══════════════════════════════════════
-   FILTER & AGGREGATION
-══════════════════════════════════════ */
+/* ── FILTER LOGIC ── */
 function lastN(n){
-  const now=new Date(),res=[];
-  for(let i=n-1;i>=0;i--){const d=new Date(now.getFullYear(),now.getMonth()-i,1);res.push(TH_MO[d.getMonth()]);}
-  return res;
+  const now=new Date(),r=[];
+  for(let i=n-1;i>=0;i--){const d=new Date(now.getFullYear(),now.getMonth()-i,1);r.push(TH_MO[d.getMonth()]);}
+  return r;
 }
-function aggMonths(months){
+function aggMo(months){
   const ds=months.map(m=>RD[m]).filter(Boolean);
-  if(!ds.length) return null;
-  if(ds.length===1) return ds[0];
+  if(!ds.length)return null;
+  if(ds.length===1)return ds[0];
   const total=ds.reduce((s,d)=>s+d.total,0);
-  const uniq =Math.round(ds.reduce((s,d)=>s+d.uniq,0)*0.82); // approx dedup
-  function mg(k){
-    const c={};
-    for(const d of ds) for(const[kk,v]of d[k]) c[kk]=(c[kk]||0)+v;
-    return Object.entries(c).sort((a,b)=>b[1]-a[1]).map(([kk,v])=>[kk,v]);
-  }
-  const gender={};
-  for(const d of ds) for(const[k,v]of Object.entries(d.gender)) gender[k]=(gender[k]||0)+v;
+  const uniq=Math.round(ds.reduce((s,d)=>s+d.uniq,0)*0.82);
+  function mg(k){const c={};for(const d of ds)for(const[kk,v]of d[k])c[kk]=(c[kk]||0)+v;return Object.entries(c).sort((a,b)=>b[1]-a[1]).map(([kk,v])=>[kk,v]);}
+  const gender={};for(const d of ds)for(const[k,v]of Object.entries(d.gender))gender[k]=(gender[k]||0)+v;
   return{total,uniq,sym:mg('sym'),med:mg('med'),grp:mg('grp'),time:mg('time'),gender,area:mg('area')};
 }
 function applyArea(d){
-  if(!d||AREA==='all') return d;
-  const aEntry=(d.area||[]).find(([n])=>n===AREA);
-  if(!aEntry) return null;
-  const aTotal=aEntry[1];
-  const ratio=d.total?aTotal/d.total:0;
+  if(!d||AREA==='all')return d;
+  const ae=(d.area||[]).find(([n])=>n===AREA);
+  if(!ae)return null;
+  const at=ae[1],ratio=d.total?at/d.total:0;
   const sc=arr=>arr.map(([k,v])=>[k,Math.max(1,Math.round(v*ratio))]);
   const F=d.gender['F']||0,M=d.gender['M']||0;
-  return{...d,total:aTotal,uniq:Math.round(d.uniq*ratio),
+  return{...d,total:at,uniq:Math.round(d.uniq*ratio),
     sym:sc(d.sym),med:sc(d.med),grp:sc(d.grp),time:sc(d.time),
-    gender:{F:Math.round(F*ratio),M:Math.round(M*ratio)},
-    area:[[AREA,aTotal]]};
+    gender:{F:Math.round(F*ratio),M:Math.round(M*ratio)},area:[[AREA,at]]};
 }
 function getData(){
   let d;
-  if(FILTER==='all') d=RD['__all__'];
-  else if(FILTER==='1m')  d=aggMonths(lastN(1));
-  else if(FILTER==='3m')  d=aggMonths(lastN(3));
-  else if(FILTER==='6m')  d=aggMonths(lastN(6));
-  else if(FILTER==='12m') d=aggMonths(lastN(12));
+  if(FILTER==='all')d=RD['__all__'];
+  else if(FILTER==='1m')d=aggMo(lastN(1));
+  else if(FILTER==='3m')d=aggMo(lastN(3));
+  else if(FILTER==='6m')d=aggMo(lastN(6));
+  else if(FILTER==='12m')d=aggMo(lastN(12));
   else d=RD[FILTER]||null;
   return applyArea(d);
 }
-function setArea(val,el){
-  AREA=val;
-  document.querySelectorAll('.abtn').forEach(b=>b.classList.remove('on'));
-  el.classList.add('on');
-  render(getData());
-}
 function getBarData(){
-  // Monthly totals for bar chart
-  const months=FILTER==='all'?TH_MO:
-                FILTER==='1m'?lastN(1):
-                FILTER==='3m'?lastN(3):
-                FILTER==='6m'?lastN(6):
-                FILTER==='12m'?lastN(12):
-                [FILTER];
-  return months.filter(m=>RD[m]).map(m=>({label:TH_SH[TH_MO.indexOf(m)],val:RD[m].total}));
+  const months=FILTER==='all'?TH_MO:FILTER==='1m'?lastN(1):FILTER==='3m'?lastN(3):FILTER==='6m'?lastN(6):FILTER==='12m'?lastN(12):[FILTER];
+  return months.filter(m=>RD[m]).map(m=>{
+    const d=RD[m];
+    const at=AREA==='all'?d.total:((d.area||[]).find(([n])=>n===AREA)||[null,d.total])[1];
+    return{label:TH_SH[TH_MO.indexOf(m)],val:at};
+  });
 }
 function setF(val,el){
   FILTER=val;
@@ -754,10 +451,21 @@ function setF(val,el){
   el.classList.add('on');
   render(getData());
 }
+function setA(val,el){
+  AREA=val;
+  document.querySelectorAll('.abtn').forEach(b=>b.classList.remove('on'));
+  el.classList.add('on');
+  render(getData());
+}
+function setFM(val,el){
+  FILTER=val;
+  document.querySelectorAll('.pbtn,.mbtn').forEach(b=>b.classList.remove('on'));
+  document.querySelectorAll('.pbtn').forEach(b=>{if((b.getAttribute('onclick')||'').includes("'"+val+"'"))b.classList.add('on');});
+  el.classList.add('on');
+  render(getData());
+}
 
-/* ══════════════════════════════════════
-   ANIMATION UTILS
-══════════════════════════════════════ */
+/* ── ANIMATION ── */
 function animN(id,target,dur=700){
   const el=document.getElementById(id);if(!el)return;
   const s=Date.now();
@@ -765,357 +473,191 @@ function animN(id,target,dur=700){
     el.textContent=Math.round(e*target).toLocaleString();if(t<1)requestAnimationFrame(f);};
   requestAnimationFrame(f);
 }
-function animW(el,pct){
-  if(!el)return;el.style.width='0%';
-  requestAnimationFrame(()=>requestAnimationFrame(()=>{el.style.width=pct.toFixed(1)+'%';}));
-}
+function animW(el,pct){if(!el)return;el.style.width='0%';requestAnimationFrame(()=>requestAnimationFrame(()=>{el.style.width=pct.toFixed(1)+'%';}));}
 function $t(id,v){const e=document.getElementById(id);if(e)e.textContent=v;}
 
-/* ══════════════════════════════════════
-   RENDER
-══════════════════════════════════════ */
+/* ── RENDER ── */
 function render(d){
   if(!d){renderEmpty();return;}
-
-  /* KPI */
-  animN('kv-total',d.total);
-  animN('kv-emp',d.uniq);
+  animN('kv0',d.total);animN('kv1',d.uniq);
   const F=d.gender['F']||0,M=d.gender['M']||0,gT=F+M;
-  $t('kv-gen',`${F.toLocaleString()} / ${M.toLocaleString()}`);
-  $t('ks-gen',`หญิง ${(gT?F/gT*100:0).toFixed(1)}% · ชาย ${(gT?M/gT*100:0).toFixed(1)}%`);
-  const tSym=d.sym[0];if(tSym){$t('kv-sym',tSym[0]);$t('ks-sym',tSym[1].toLocaleString()+' ครั้ง');}
-  const tMed=d.med[0];if(tMed){$t('kv-med',tMed[0]);$t('ks-med',tMed[1].toLocaleString()+' ครั้ง');}
-
-  /* Top-5 lists */
+  $t('kv2',F.toLocaleString()+' / '+M.toLocaleString());
+  $t('ks2','หญิง '+(gT?Math.round(F/gT*100):0)+'% · ชาย '+(gT?Math.round(M/gT*100):0)+'%');
+  const ts=d.sym[0];if(ts){$t('kv3',ts[0]);$t('ks3',ts[1].toLocaleString()+' ครั้ง');}
+  const tm=d.med[0];if(tm){$t('kv4',tm[0]);$t('ks4',tm[1].toLocaleString()+' ครั้ง');}
   rkList('ls',d.sym.slice(0,5),'bo','co');
   rkList('lm',d.med.slice(0,5),'bb','cb');
   rkList('lg',d.grp.slice(0,5),'bt','ct');
   rkList('lt',d.time.slice(0,5),'bp','cp');
-
-  /* Charts */
   const bd=getBarData();
   renderBar(bd.map(x=>x.label),bd.map(x=>x.val));
   renderDonut(d.grp.slice(0,5).map(x=>x[0]),d.grp.slice(0,5).map(x=>x[1]));
-
-  /* Gender bars */
   $t('gfc',F.toLocaleString());$t('gmc',M.toLocaleString());
-  $t('gfp',gT?`${(F/gT*100).toFixed(1)}% ของทั้งหมด`:'');
-  $t('gmp',gT?`${(M/gT*100).toFixed(1)}% ของทั้งหมด`:'');
+  $t('gfp',gT?(F/gT*100).toFixed(1)+'% ของทั้งหมด':'');
+  $t('gmp',gT?(M/gT*100).toFixed(1)+'% ของทั้งหมด':'');
   animW(document.getElementById('gfb'),gT?F/gT*100:0);
   animW(document.getElementById('gmb'),gT?M/gT*100:0);
-
-  /* Area */
-  const areas=d.area,maxA=areas[0]?.[1]||1;
-  document.getElementById('awrap').innerHTML=areas.slice(0,5).map(([n,v])=>`
-    <div class="ai"><div class="aih"><span class="ain">📍 ${n}</span><span class="aic">${v.toLocaleString()}</span></div>
-    <div class="aibg"><div class="aifill" data-w="${(v/maxA*100).toFixed(1)}"></div></div></div>`).join('');
-  requestAnimationFrame(()=>requestAnimationFrame(()=>{
-    document.querySelectorAll('.aifill').forEach(b=>{b.style.width=b.dataset.w+'%';});
-  }));
-
-  /* Summary */
-  const mCount=FILTER==='all'?Object.keys(RD).filter(k=>k!=='__all__'&&RD[k].total>0).length:
-                ['1m','3m','6m','12m'].includes(FILTER)?lastN(parseInt(FILTER)).filter(m=>RD[m]).length:1;
-  const items=[
-    ['📆','เดือนที่มีข้อมูล',mCount+' เดือน'],
-    ['🩺','ประเภทอาการ',d.sym.length+' รายการ'],
-    ['💊','ยาที่ใช้',d.med.length+' รายการ'],
-    ['🧬','กลุ่มยา',d.grp.length+' กลุ่ม'],
-    ['📊','เฉลี่ย/เดือน',mCount?Math.round(d.total/mCount).toLocaleString()+' ครั้ง':'—'],
-  ];
-  document.getElementById('sumlist').innerHTML=items.map(([i,l,v],idx)=>
-    `<div class="si" style="animation-delay:${.28+idx*.055}s"><span class="sl">${i} ${l}</span><span class="sv">${v}</span></div>`).join('');
-
+  const maxA=(d.area[0]||[null,1])[1]||1;
+  document.getElementById('awrap').innerHTML=(d.area||[]).slice(0,5).map(([n,v])=>'<div class="ai"><div class="aih"><span class="ain">📍 '+n+'</span><span class="aic">'+v.toLocaleString()+'</span></div><div class="aibg"><div class="aifill" data-w="'+(v/maxA*100).toFixed(1)+'"></div></div></div>').join('');
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{document.querySelectorAll('.aifill').forEach(b=>{b.style.width=b.dataset.w+'%';});}));
+  const mc=FILTER==='all'?Object.keys(RD).filter(k=>k!=='__all__'&&RD[k].total>0).length:['1m','3m','6m','12m'].includes(FILTER)?lastN(parseInt(FILTER)).filter(m=>RD[m]).length:1;
+  document.getElementById('sumlist').innerHTML=[['📆','เดือนที่มีข้อมูล',mc+' เดือน'],['🩺','ประเภทอาการ',d.sym.length+' รายการ'],['💊','ยาที่ใช้',d.med.length+' รายการ'],['🧬','กลุ่มยา',d.grp.length+' กลุ่ม'],['📊','เฉลี่ย/เดือน',mc?Math.round(d.total/mc).toLocaleString()+' ครั้ง':'—']].map(([i,l,v],idx)=>'<div class="si" style="animation-delay:'+(0.28+idx*0.055)+'s"><span class="sl">'+i+' '+l+'</span><span class="sv">'+v+'</span></div>').join('');
   $t('fttime','อัปเดต: '+new Date().toLocaleString('th-TH'));
 }
 
 function rkList(id,items,barCls,cntCls){
-  const max=items[0]?.[1]||1,el=document.getElementById(id);if(!el)return;
-  el.innerHTML=items.map(([name,n],i)=>`
-    <div class="ri" style="animation-delay:${.04+i*.07}s">
-      <div class="rh">
-        <div class="rb rb${i+1}">${i+1}</div>
-        <div class="rn" title="${name}">${name}</div>
-        <div class="rc ${cntCls}">${n.toLocaleString()}</div>
-      </div>
-      <div class="rbg"><div class="rbar ${barCls}" data-w="${(n/max*100).toFixed(1)}"></div></div>
-    </div>`).join('');
-  requestAnimationFrame(()=>requestAnimationFrame(()=>{
-    el.querySelectorAll('[data-w]').forEach(b=>{b.style.width=b.dataset.w+'%';});
-  }));
+  const max=(items[0]||[null,1])[1]||1,el=document.getElementById(id);if(!el)return;
+  el.innerHTML=items.map(([name,n],i)=>'<div class="ri" style="animation-delay:'+(0.04+i*0.07)+'s"><div class="rh"><div class="rb rb'+(i+1)+'">'+(i+1)+'</div><div class="rn" title="'+name+'">'+name+'</div><div class="rc '+cntCls+'">'+n.toLocaleString()+'</div></div><div class="rbg"><div class="rbar '+barCls+'" data-w="'+(n/max*100).toFixed(1)+'"></div></div></div>').join('');
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{el.querySelectorAll('[data-w]').forEach(b=>{b.style.width=b.dataset.w+'%';});}));
 }
-function renderEmpty(){
-  ['ls','lm','lg','lt'].forEach(id=>{
-    const e=document.getElementById(id);
-    if(e) e.innerHTML='<div style="color:var(--muted);font-size:12px;text-align:center;padding:22px 0">ไม่มีข้อมูลในช่วงนี้</div>';
-  });
-}
+function renderEmpty(){['ls','lm','lg','lt'].forEach(id=>{const e=document.getElementById(id);if(e)e.innerHTML='<div style="color:var(--muted);font-size:12px;text-align:center;padding:22px 0">ไม่มีข้อมูลในช่วงนี้</div>';});}
 
-/* ══════════════════════════════════════
-   CHARTS
-══════════════════════════════════════ */
-function gc(){return{grid:isDark?'rgba(255,255,255,0.05)':'rgba(0,0,0,0.05)',tick:isDark?'#4a6070':'#607080',leg:isDark?'#7a9ab8':'#505060',tip:{bg:isDark?'#081224':'#fff',t:isDark?'#e8f0fe':'#0d1a2d',b:isDark?'#7a9ab8':'#607080'}};}
-
+/* ── CHARTS ── */
+function gc(){return isDark?{grid:'rgba(255,255,255,.05)',tick:'#4a6070',leg:'#7a9ab8',bg:'#081224',tc:'#e8f0fe',bc:'#7a9ab8'}:{grid:'rgba(0,0,0,.05)',tick:'#607080',leg:'#505060',bg:'#fff',tc:'#0d1a2d',bc:'#607080'};}
 function renderBar(labels,data){
-  const ctx=document.getElementById('cbar');if(!ctx)return;
-  if(typeof Chart==='undefined')return;
-  if(mChart)mChart.destroy();
-  const c=gc(),mx=data.indexOf(Math.max(...data));
-  mChart=new Chart(ctx,{type:'bar',
-    data:{labels,datasets:[{label:'ครั้ง',data,
-      backgroundColor:data.map((_,i)=>i===mx?'rgba(200,168,69,.85)':'rgba(79,142,247,.4)'),
-      borderColor:    data.map((_,i)=>i===mx?'#c8a845':'#4f8ef7'),
-      borderWidth:1.5,borderRadius:7,borderSkipped:false}]},
-    options:{responsive:true,maintainAspectRatio:false,animation:{duration:900,easing:'easeOutQuart'},
-      plugins:{legend:{display:false},tooltip:{backgroundColor:c.tip.bg,titleColor:c.tip.t,bodyColor:c.tip.b,borderColor:'rgba(200,168,69,.3)',borderWidth:1,padding:10,cornerRadius:8}},
-      scales:{x:{grid:{color:c.grid},ticks:{color:c.tick,font:{size:12,weight:'600'}}},
-              y:{grid:{color:c.grid},ticks:{color:c.tick,font:{size:11}}}}}});
+  const ctx=document.getElementById('cbar');if(!ctx||typeof Chart==='undefined')return;
+  if(mCh)mCh.destroy();
+  const c=gc(),mx=data.length?data.indexOf(Math.max(...data)):0;
+  mCh=new Chart(ctx,{type:'bar',data:{labels,datasets:[{label:'ครั้ง',data,backgroundColor:data.map((_,i)=>i===mx?'rgba(200,168,69,.85)':'rgba(79,142,247,.4)'),borderColor:data.map((_,i)=>i===mx?'#c8a845':'#4f8ef7'),borderWidth:1.5,borderRadius:7,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,animation:{duration:900,easing:'easeOutQuart'},plugins:{legend:{display:false},tooltip:{backgroundColor:c.bg,titleColor:c.tc,bodyColor:c.bc,borderColor:'rgba(200,168,69,.3)',borderWidth:1,padding:10,cornerRadius:8}},scales:{x:{grid:{color:c.grid},ticks:{color:c.tick,font:{size:12,weight:'600'}}},y:{grid:{color:c.grid},ticks:{color:c.tick,font:{size:11}}}}}});
 }
 function renderDonut(labels,data){
-  const ctx=document.getElementById('cdonut');if(!ctx)return;
-  if(typeof Chart==='undefined')return;
-  if(dChart)dChart.destroy();
+  const ctx=document.getElementById('cdonut');if(!ctx||typeof Chart==='undefined')return;
+  if(dCh)dCh.destroy();
   const c=gc(),cols=['#c8a845','#4f8ef7','#18c3ad','#b06fff','#ff8c40'];
-  dChart=new Chart(ctx,{type:'doughnut',
-    data:{labels,datasets:[{data,backgroundColor:cols.map(x=>x+'cc'),borderColor:cols,borderWidth:2,hoverOffset:10}]},
-    options:{responsive:true,maintainAspectRatio:false,animation:{duration:900,easing:'easeOutQuart'},cutout:'64%',
-      plugins:{legend:{position:'bottom',labels:{color:c.leg,font:{size:10,weight:'600'},padding:10,boxWidth:10,usePointStyle:true,pointStyle:'circle'}},
-        tooltip:{backgroundColor:c.tip.bg,titleColor:c.tip.t,bodyColor:c.tip.b,borderColor:'rgba(200,168,69,.3)',borderWidth:1,padding:10,cornerRadius:8}}}});
+  dCh=new Chart(ctx,{type:'doughnut',data:{labels,datasets:[{data,backgroundColor:cols.map(x=>x+'cc'),borderColor:cols,borderWidth:2,hoverOffset:10}]},options:{responsive:true,maintainAspectRatio:false,animation:{duration:900,easing:'easeOutQuart'},cutout:'64%',plugins:{legend:{position:'bottom',labels:{color:c.leg,font:{size:10,weight:'600'},padding:10,boxWidth:10,usePointStyle:true,pointStyle:'circle'}},tooltip:{backgroundColor:c.bg,titleColor:c.tc,bodyColor:c.bc,borderColor:'rgba(200,168,69,.3)',borderWidth:1,padding:10,cornerRadius:8}}}});
 }
 
-/* ══════════════════════════════════════
-   DATA LOADING (ลองโหลด Google Sheets ก่อน)
-══════════════════════════════════════ */
+/* ── STATUS ── */
 function setStatus(state,txt){document.getElementById('dot').className='dot '+state;$t('stxt',txt);}
 
+/* ── LOAD DATA ── */
 async function loadData(){
-  const rico=document.getElementById('rico');
-  if(rico) rico.className='spin go';
+  const rico=document.getElementById('rico');if(rico)rico.className='sp go';
   document.getElementById('ov').classList.add('show');
   setStatus('loading','กำลังโหลด…');
   let ok=false;
   try{
-    // ใช้ AbortController แบบ manual สำหรับ browser เก่า
-    const ctrl=new AbortController();
-    const timer=setTimeout(()=>ctrl.abort(),6000);
+    const ctrl=new AbortController();const timer=setTimeout(()=>ctrl.abort(),6000);
     try{
-      const res=await fetch(CSV_URL,{cache:'no-cache',signal:ctrl.signal});
+      const res=await fetch(CSV,{cache:'no-cache',signal:ctrl.signal});
       clearTimeout(timer);
-      if(res.ok){
-        const txt=await res.text();
-        if(txt&&txt.length>200&&txt.includes(',')){
-          const rows=parseCSV(txt);
-          if(rows.length>10){
-            setStatus('ok',`Google Sheets — ${rows.length.toLocaleString()} รายการ`);
-            SRC='live';ok=true;
-          }
-        }
-      }
+      if(res.ok){const txt=await res.text();if(txt&&txt.length>200&&txt.includes(',')){const rows=parseCSV(txt);if(rows.length>10){setStatus('ok','Google Sheets — '+rows.length.toLocaleString()+' รายการ');SRC='live';ok=true;}}}
     }catch(e){clearTimeout(timer);}
   }catch(e){}
-  if(!ok){
-    setStatus('ok','ข้อมูลจริง 1,481 รายการ (ม.ค.–มิ.ย. 2568)');
-    SRC='embedded';
-  }
+  if(!ok){setStatus('ok','ข้อมูลจริง 1,481 รายการ (ม.ค.–มิ.ย. 2568)');SRC='embedded';}
   try{
-    const badge=document.getElementById('srcbadge');
-    if(badge) badge.innerHTML=`<span class="src-badge">✓ ${SRC==='live'?'ข้อมูลสด Google Sheets':'ข้อมูลจริง ม.ค.–มิ.ย. 2568'}</span>`;
+    const b=document.getElementById('srcbadge');
+    if(b)b.innerHTML='<span class="src-badge">✓ '+(SRC==='live'?'ข้อมูลสด Google Sheets':'ข้อมูลจริง ม.ค.–มิ.ย. 2568')+'</span>';
     render(getData());
-  }catch(e){console.error('render error:',e);}
-  // ซ่อน overlay เสมอ แม้จะ error
-  if(rico) rico.className='spin';
+  }catch(e){console.error(e);}
+  if(rico)rico.className='sp';
   document.getElementById('ov').classList.remove('show');
 }
 
-/* ══════════════════════════════════════
-   LIVE CSV PARSER
-══════════════════════════════════════ */
+/* ── CSV PARSER ── */
 function parseCSV(text){
   const lines=text.trim().split(/\r?\n/);
   let start=1;
   for(let i=0;i<Math.min(lines.length,5);i++){const c=sl(lines[i]);if(c[0]&&/^\d+$/.test(c[0].trim())){start=i;break;}}
-  const byMonth={};
+  const byMo={};
   for(let i=start;i<lines.length;i++){
     const c=sl(lines[i]);
-    if(c.length<5||!/^\d+$/.test((c[0]||'').trim())) continue;
-    const gender=(c[3]||'').trim();if(!['M','F'].includes(gender.toUpperCase())&&!gender) continue;
-    const m=nm(c[6]);if(!m)continue;
-    if(!byMonth[m]) byMonth[m]={total:0,uniq:new Set(),sym:{},med:{},grp:{},time:{},gender:{},area:{}};
-    const d=byMonth[m];
-    d.total++;
+    if(c.length<5||!/^\d+$/.test((c[0]||'').trim()))continue;
+    const m=nmn(c[6]);if(!m)continue;
+    if(!byMo[m])byMo[m]={total:0,uniq:new Set(),sym:{},med:{},grp:{},time:{},gender:{},area:{}};
+    const d=byMo[m];d.total++;
     const id=(c[1]||'').trim();if(id)d.uniq.add(id);
     function add(o,v){if(v)o[v]=(o[v]||0)+1;}
-    add(d.gender,gender.toUpperCase()==='M'?'M':'F');
-    add(d.area,(c[5]||'').trim());
-    add(d.time,nt(c[7]));add(d.sym,ns(c[8]));add(d.med,(c[9]||'').trim().toUpperCase());add(d.grp,ng(c[10]));
+    const g=(c[3]||'').trim().toUpperCase();add(d.gender,g==='M'?'M':'F');
+    add(d.area,(c[5]||'').trim());add(d.time,nt(c[7]));add(d.sym,ns(c[8]));
+    add(d.med,(c[9]||'').trim().toUpperCase());add(d.grp,ng(c[10]));
   }
-  // Build into RD format and inject
-  const months=Object.keys(byMonth);
+  const months=Object.keys(byMo);
   for(const m of months){
-    const d=byMonth[m];
-    const s2a=(o,n=10)=>Object.entries(o).sort((a,b)=>b[1]-a[1]).slice(0,n).map(([k,v])=>[k,v]);
+    const d=byMo[m];const s2a=(o,n=10)=>Object.entries(o).sort((a,b)=>b[1]-a[1]).slice(0,n).map(([k,v])=>[k,v]);
     RD[m]={total:d.total,uniq:d.uniq.size,sym:s2a(d.sym),med:s2a(d.med),grp:s2a(d.grp),time:s2a(d.time,4),gender:d.gender,area:s2a(d.area,5)};
   }
-  // Recompute __all__
-  const allMonths=Object.keys(RD).filter(k=>k!=='__all__');
-  const all=aggMonths(allMonths);if(all) RD['__all__']={...all,uniq:new Set(months.flatMap(m=>[])).size||all.uniq};
-  return months.flatMap(m=>Array(byMonth[m].total).fill(m));
+  const all=aggMo(months);if(all)RD['__all__']={...all};
+  return months.flatMap(m=>Array(byMo[m].total).fill(m));
 }
-function injectLiveData(rows){/* already injected in parseCSV */}
 function sl(line){const r=[];let cur='',q=false;for(let i=0;i<line.length;i++){const ch=line[i];if(ch==='"'){if(q&&line[i+1]==='"'){cur+='"';i++;}else q=!q;}else if(ch===','&&!q){r.push(cur);cur='';}else cur+=ch;}r.push(cur);return r;}
-function nm(m){return({'กุมาพันธ์':'กุมภาพันธ์','กุมาพันธ':'กุมภาพันธ์'})[m?.trim()]||m?.trim()||'';}
+function nmn(m){return({'กุมาพันธ์':'กุมภาพันธ์'})[m&&m.trim()]||m&&m.trim()||'';}
 function nt(t){t=(t||'').trim();if(/06|เช้า/.test(t))return'ช่วงเช้า (06:00–11:59)';if(/12:0|เที่ยง/.test(t))return'ช่วงเที่ยง (12:00–12:59)';if(/13|บ่าย/.test(t))return'ช่วงบ่าย (13:00–15:59)';if(/16|เย็น/.test(t))return'ช่วงเย็น (16:00–17:59)';return t;}
-function ns(s){s=(s||'').trim();if(/ปวดศร|ปวดศีร/.test(s))return'ปวดศีรษะ';if(/ปวดกล้ามเนื้อ|ปวดหลัง|ปวดขา/.test(s))return'ปวดกล้ามเนื้อ/ปวดหลัง';if(/จุกแน่นท้อง|ท้องอืด|แน่นท้อง/.test(s))return'ท้องอืด/แน่นท้อง';if(/ถ่ายเหลว|ปวดบิดท้อง|ท้องเสีย/.test(s))return'ถ่ายเหลว/ปวดบิดท้อง';if(/ไอ|เจ็บคอ/.test(s))return'ไอ/เจ็บคอ';if(/คัดจมูก|แน่นจมูก|น้ำมูก/.test(s))return'คัดจมูก/น้ำมูกไหล';if(/ผื่|ลมพิษ/.test(s))return'ผื่นคัน/ลมพิษ';if(/แผล|ถลอก/.test(s))return'แผลถลอก/แผลสด';if(/ประจำเดือน/.test(s))return'ปวดท้องประจำเดือน';if(/เวียนศ|มึนเวียน/.test(s))return'เวียนศีรษะ';return s;}
-function ng(g){g=(g||'').trim();if(/แก้ปวด|ลดไข้|ต้านการอักเสบ/.test(g))return'กลุ่มแก้ปวด/ลดไข้';if(/ทางเดินหายใจ|หวัด|แก้แพ้/.test(g))return'กลุ่มระบบทางเดินหายใจ';if(/ทางเดินอาหาร/.test(g))return'กลุ่มระบบทางเดินอาหาร';if(/ภายนอก|ผิวหนัง|แผลเฉพาะ/.test(g))return'กลุ่มยาใช้ภายนอก';if(/ปฐมพยาบาล|เวชภัณฑ์/.test(g))return'อุปกรณ์ปฐมพยาบาล';if(/เวียนศีรษะ|เมารถ/.test(g))return'กลุ่มแก้เวียนศีรษะ';if(/ยาตา|ดวงตา/.test(g))return'กลุ่มยาตา';if(/ฆ่าเชื้อ/.test(g))return'กลุ่มยาฆ่าเชื้อ';return g;}
+function ns(s){s=(s||'').trim();if(/ปวดศ/.test(s))return'ปวดศีรษะ';if(/กล้ามเนื้อ|ปวดหลัง/.test(s))return'ปวดกล้ามเนื้อ/ปวดหลัง';if(/ท้องอืด|แน่นท้อง|จุกแน่น/.test(s))return'ท้องอืด/แน่นท้อง';if(/ถ่ายเหลว|ปวดบิด|ท้องเสีย/.test(s))return'ถ่ายเหลว/ปวดบิดท้อง';if(/ไอ|เจ็บคอ/.test(s))return'ไอ/เจ็บคอ';if(/คัดจมูก|น้ำมูก/.test(s))return'คัดจมูก/น้ำมูกไหล';if(/ผื่น|ลมพิษ/.test(s))return'ผื่นคัน/ลมพิษ';if(/แผล|ถลอก/.test(s))return'แผลถลอก/แผลสด';if(/ประจำเดือน/.test(s))return'ปวดท้องประจำเดือน';if(/เวียน/.test(s))return'เวียนศีรษะ';return s;}
+function ng(g){g=(g||'').trim();if(/แก้ปวด|ลดไข้/.test(g))return'กลุ่มแก้ปวด/ลดไข้';if(/ทางเดินหายใจ|แก้แพ้/.test(g))return'กลุ่มระบบทางเดินหายใจ';if(/ทางเดินอาหาร/.test(g))return'กลุ่มระบบทางเดินอาหาร';if(/ภายนอก|ผิวหนัง/.test(g))return'กลุ่มยาใช้ภายนอก';if(/ปฐมพยาบาล/.test(g))return'อุปกรณ์ปฐมพยาบาล';if(/เวียนศีรษะ|เมารถ/.test(g))return'กลุ่มแก้เวียนศีรษะ';if(/ยาตา/.test(g))return'กลุ่มยาตา';if(/ฆ่าเชื้อ/.test(g))return'กลุ่มยาฆ่าเชื้อ';return g;}
 
-/* ══════════════════════════════════════
-   AI ANALYSIS ENGINE (built-in, no API key needed)
-══════════════════════════════════════ */
+/* ── AI ANALYSIS ── */
 function runAI(){
-  const d = getData();
-  if(!d){ return; }
-  const btn = document.getElementById('ai-run-btn');
-  const loading = document.getElementById('ai-loading');
-  const result = document.getElementById('ai-result');
-  btn.disabled = true;
-  loading.classList.add('show');
-  result.innerHTML = '';
-  // simulate brief analysis delay for UX
+  const d=getData();if(!d)return;
+  const btn=document.getElementById('ai-btn');
+  const ld=document.getElementById('ai-ld');
+  const res=document.getElementById('ai-result');
+  btn.disabled=true;ld.classList.add('show');res.innerHTML='';
   setTimeout(()=>{
-    try{ renderAIResult(analyzeData(d)); }catch(e){}
-    btn.disabled = false;
-    loading.classList.remove('show');
-  }, 900);
+    try{renderAI(analyzeAI(d));}catch(e){}
+    btn.disabled=false;ld.classList.remove('show');
+  },900);
 }
-
-function analyzeData(d){
-  const symNames = d.sym.map(x=>x[0]);
-  const grpNames = d.grp.map(x=>x[0]);
-  const F=d.gender['F']||0, M=d.gender['M']||0, gT=F+M;
-  const fPct = gT ? Math.round(F/gT*100) : 0;
-  const topTime = d.time[0]?.[0]||'';
-  const total = d.total;
-
-  /* ── ตรวจจับปัญหาหลัก ── */
-  const hasHeadache    = symNames.some(s=>/ปวดศีรษะ|ไมเกรน/.test(s));
-  const hasMuscle      = symNames.some(s=>/กล้ามเนื้อ|ปวดหลัง|ปวดขา/.test(s));
-  const hasGI          = symNames.some(s=>/ท้อง|ถ่าย|แน่น|อาหาร/.test(s));
-  const hasRespir      = symNames.some(s=>/ไอ|เจ็บคอ|คัดจมูก|หวัด/.test(s));
-  const hasWound       = symNames.some(s=>/แผล|ถลอก/.test(s));
-  const hasDizzy       = symNames.some(s=>/เวียน/.test(s));
-  const hasSkin        = symNames.some(s=>/ผื่น|คัน|ลมพิษ/.test(s));
-  const hasPeriod      = symNames.some(s=>/ประจำเดือน/.test(s));
-  const highFemale     = fPct >= 60;
-  const isMorningPeak  = /เช้า/.test(topTime);
-  const isAfternoonPeak= /บ่าย/.test(topTime);
-  const hasOutdoor     = grpNames.some(g=>/ปฐมพยาบาล/.test(g));
-
-  /* ── สร้าง summary ── */
-  const topSym = d.sym[0]?.[0]||'';
-  const topSym2 = d.sym[1]?.[0]||'';
-  const filterLabel = FILTER==='all'?'ทุกช่วง':
-    FILTER==='1m'?'เดือนที่ผ่านมา':FILTER==='3m'?'3 เดือนที่ผ่านมา':
-    FILTER==='6m'?'6 เดือนที่ผ่านมา':FILTER==='12m'?'12 เดือนที่ผ่านมา':FILTER;
-  const summary = `ช่วง${filterLabel} พบการเข้าใช้บริการ ${total.toLocaleString()} ครั้ง ` +
-    `อาการหลักคือ${topSym}และ${topSym2} พนักงานหญิง ${fPct}% ชาย ${100-fPct}% ` +
-    `ช่วงเวลาที่มาใช้บริการมากที่สุดคือ${topTime.replace(/\s*\(.*\)/,'')}`;
-
-  /* ── สร้างหมวดกิจกรรม ── */
-  const cats = [];
-
-  /* 1. ออกกำลังกาย / ยืดเส้น */
-  if(hasHeadache || hasMuscle || hasDizzy){
-    const acts = [];
-    if(hasMuscle) acts.push('โปรแกรม Stretch & Flex ก่อนเริ่มงานทุกวัน (10 นาที)');
-    if(hasHeadache) acts.push('กิจกรรม "พักสายตา 20-20-20" ทุก 20 นาที สำหรับพนักงานหน้าจอ');
-    if(hasDizzy) acts.push('ชั้นเรียนโยคะเบื้องต้นช่วงพักกลางวัน สัปดาห์ละ 2 ครั้ง');
-    acts.push('ติดตั้งสถานีออกกำลังกายเบาๆ (Micro Gym) ในพื้นที่พักผ่อน');
-    if(isMorningPeak) acts.push('Morning Exercise ก่อนเข้างาน 07:30–08:00 น. นำโดย อสม.');
-    cats.push({icon:'🏃',title:'การออกกำลังกายและยืดเส้น',activities:acts.slice(0,4)});
+function analyzeAI(d){
+  const sn=d.sym.map(x=>x[0]),gn=d.grp.map(x=>x[0]);
+  const F=d.gender['F']||0,M=d.gender['M']||0,gT=F+M;
+  const fPct=gT?Math.round(F/gT*100):0;
+  const topTime=d.time[0]&&d.time[0][0]||'';
+  const hasHead=sn.some(s=>/ปวดศีรษะ/.test(s));
+  const hasMus=sn.some(s=>/กล้ามเนื้อ|ปวดหลัง/.test(s));
+  const hasGI=sn.some(s=>/ท้อง|ถ่าย|แน่น/.test(s));
+  const hasRes=sn.some(s=>/ไอ|เจ็บคอ|คัดจมูก|หวัด/.test(s));
+  const hasWnd=sn.some(s=>/แผล|ถลอก/.test(s));
+  const hasDiz=sn.some(s=>/เวียน/.test(s));
+  const hasSk=sn.some(s=>/ผื่น|คัน|ลมพิษ/.test(s));
+  const hasPrd=sn.some(s=>/ประจำเดือน/.test(s));
+  const isMorn=/เช้า/.test(topTime),isAftn=/บ่าย/.test(topTime);
+  const fl=FILTER==='all'?'ทุกช่วง':FILTER==='1m'?'เดือนล่าสุด':FILTER==='3m'?'3 เดือนล่าสุด':FILTER==='6m'?'6 เดือนล่าสุด':FILTER==='12m'?'12 เดือนล่าสุด':FILTER;
+  const areaLabel=AREA==='all'?'':' พื้นที่ '+AREA;
+  const sum='ช่วง'+fl+areaLabel+' พบการเข้าใช้บริการ '+d.total.toLocaleString()+' ครั้ง อาการหลักคือ'+(d.sym[0]&&d.sym[0][0]||'')+' พนักงานหญิง '+fPct+'% ชาย '+(100-fPct)+'%';
+  const cats=[];
+  if(hasHead||hasMus||hasDiz){
+    const a=[];
+    if(hasMus)a.push('โปรแกรม Stretch & Flex ก่อนเริ่มงานทุกวัน (10 นาที)');
+    if(hasHead)a.push('กิจกรรมพักสายตา 20-20-20 ทุก 20 นาทีสำหรับพนักงานหน้าจอ');
+    if(hasDiz)a.push('ชั้นเรียนโยคะช่วงพักกลางวัน สัปดาห์ละ 2 ครั้ง');
+    a.push('ติดตั้งสถานีออกกำลังกายเบาๆ ในพื้นที่พักผ่อน');
+    if(isMorn)a.push('Morning Exercise นำโดย อสม. ก่อนเข้างาน 07:30–08:00 น.');
+    cats.push({icon:'🏃',title:'การออกกำลังกายและยืดเส้น',activities:a.slice(0,4)});
   }
-
-  /* 2. ความปลอดภัยและป้องกันอุบัติเหตุ */
-  if(hasWound || hasOutdoor){
-    cats.push({icon:'🦺',title:'ความปลอดภัยในการทำงาน',activities:[
-      'อบรม Safety Awareness รายไตรมาส เน้นการป้องกันแผลและการใช้อุปกรณ์ป้องกัน',
-      'แจก PPE (ถุงมือ รองเท้านิรภัย) และบังคับใช้อย่างเคร่งครัด',
-      'ติดป้าย Safety Reminder จุดเสี่ยงบนพื้นที่ทำงาน',
-      'กิจกรรม "Zero Accident Month" พร้อมรางวัลทีมที่ไม่มีอุบัติเหตุ',
-    ]});
+  if(hasWnd){
+    cats.push({icon:'🦺',title:'ความปลอดภัยในการทำงาน',activities:['อบรม Safety Awareness รายไตรมาส เน้นการป้องกันแผลและการใช้ PPE','แจกถุงมือและรองเท้านิรภัย บังคับใช้อย่างเคร่งครัด','ติดป้าย Safety Reminder บริเวณจุดเสี่ยง','กิจกรรม Zero Accident Month พร้อมรางวัลสำหรับทีมที่ไม่มีอุบัติเหตุ']});
   }
-
-  /* 3. โภชนาการและระบบทางเดินอาหาร */
-  if(hasGI || hasRespir){
-    const acts = [];
-    if(hasGI){
-      acts.push('โปรแกรม "อาหารดี ท้องสบาย" ปรับเมนูโรงอาหารลดอาหารมัน-เผ็ด');
-      acts.push('จัดหาน้ำดื่มสะอาดและผลไม้ตามฤดูกาลบริการฟรีหน้าห้องพยาบาล');
-    }
-    if(hasRespir){
-      acts.push('รณรงค์ล้างมือ 7 ขั้นตอน + ติดตั้ง Hand Sanitizer ทุก 20 เมตร');
-      acts.push('ฉีดวัคซีนไข้หวัดใหญ่ประจำปีฟรีทุกคน');
-    }
-    acts.push('เวิร์กชอป "กินถูกหลัก สุขภาพดี" กับนักโภชนาการ ปีละ 2 ครั้ง');
-    cats.push({icon:'🥗',title:'โภชนาการและสุขอนามัย',activities:acts.slice(0,4)});
+  if(hasGI||hasRes){
+    const a=[];
+    if(hasGI){a.push('โปรแกรม "อาหารดี ท้องสบาย" ปรับเมนูโรงอาหารลดอาหารมัน-เผ็ด');a.push('จัดน้ำดื่มสะอาดและผลไม้ตามฤดูกาลบริการฟรีหน้าห้องพยาบาล');}
+    if(hasRes){a.push('รณรงค์ล้างมือ 7 ขั้นตอน ติดตั้ง Hand Sanitizer ทุก 20 เมตร');a.push('ฉีดวัคซีนไข้หวัดใหญ่ประจำปีฟรีทุกคน');}
+    a.push('เวิร์กชอปโภชนาการกับนักโภชนาการ ปีละ 2 ครั้ง');
+    cats.push({icon:'🥗',title:'โภชนาการและสุขอนามัย',activities:a.slice(0,4)});
   }
-
-  /* 4. สุขภาพจิตและความเครียด */
-  if(hasHeadache || total > 200){
-    const acts = [
-      'จัดห้อง Relax Room พร้อมเก้าอี้นวดและเสียงธรรมชาติ สำหรับพักผ่อนช่วงกลางวัน',
-      'โปรแกรม Mindfulness 5 นาที ก่อนประชุมทุกครั้ง',
-      'เปิดช่องทางปรึกษานักจิตวิทยาผ่านแอปฯ (ไม่ระบุชื่อ)',
-      'กิจกรรม Team Building รายไตรมาส เพื่อสร้างความสัมพันธ์ในทีม',
-    ];
-    if(isAfternoonPeak) acts.splice(1,0,'จัด Power Nap Zone สำหรับพักช่วงบ่าย 13:00–13:20 น.');
-    cats.push({icon:'🧠',title:'สุขภาพจิตและลดความเครียด',activities:acts.slice(0,4)});
+  if(hasHead||d.total>200){
+    const a=['จัดห้อง Relax Room พร้อมเก้าอี้นวดสำหรับพักผ่อนช่วงกลางวัน','โปรแกรม Mindfulness 5 นาที ก่อนประชุมทุกครั้ง','เปิดช่องทางปรึกษานักจิตวิทยาผ่านแอปฯ (ไม่ระบุชื่อ)','กิจกรรม Team Building รายไตรมาส'];
+    if(isAftn)a.splice(1,0,'จัด Power Nap Zone สำหรับพักช่วงบ่าย 13:00–13:20 น.');
+    cats.push({icon:'🧠',title:'สุขภาพจิตและลดความเครียด',activities:a.slice(0,4)});
   }
-
-  /* 5. สิ่งแวดล้อมในการทำงาน */
   {
-    const acts = [];
-    if(hasMuscle || hasHeadache)
-      acts.push('ปรับโต๊ะ-เก้าอี้ให้ได้มาตรฐาน Ergonomics ตรวจสอบทุก 6 เดือน');
-    if(hasSkin)
-      acts.push('ติดตั้งระบบระบายอากาศและลดฝุ่นละอองในสายการผลิต');
-    acts.push('ควบคุมอุณหภูมิห้องทำงาน 24–26°C ลดความเมื่อยล้า');
-    acts.push('จัดแสงสว่างให้เพียงพอตามมาตรฐาน ≥300 lux บนพื้นที่ทำงาน');
-    if(isMorningPeak)
-      acts.push('ตรวจวัดสภาพแวดล้อมการทำงาน (เสียง ฝุ่น ความร้อน) ช่วงเช้าที่มีคนหนาแน่น');
-    cats.push({icon:'🏭',title:'สภาพแวดล้อมการทำงาน',activities:acts.slice(0,4)});
+    const a=[];
+    if(hasMus||hasHead)a.push('ปรับโต๊ะ-เก้าอี้ให้ได้มาตรฐาน Ergonomics ตรวจสอบทุก 6 เดือน');
+    if(hasSk)a.push('ติดตั้งระบบระบายอากาศและลดฝุ่นละอองในสายการผลิต');
+    a.push('ควบคุมอุณหภูมิห้องทำงาน 24–26°C ลดความเมื่อยล้า');
+    a.push('จัดแสงสว่างให้เพียงพอตามมาตรฐาน ≥300 lux บนพื้นที่ทำงาน');
+    cats.push({icon:'🏭',title:'สภาพแวดล้อมการทำงาน',activities:a.slice(0,4)});
   }
-
-  /* 6. สุขภาพพนักงานหญิง (ถ้ามีสัดส่วนสูง) */
-  if(highFemale || hasPeriod){
-    cats.push({icon:'💜',title:'สุขภาพพนักงานหญิง',activities:[
-      hasPeriod?'จัดพื้นที่พักสำหรับพนักงานที่ปวดประจำเดือน พร้อมยาสามัญประจำบ้าน':'',
-      'ตรวจสุขภาพเชิงป้องกันสำหรับพนักงานหญิง (Pap Smear, Mammogram) ฟรีปีละครั้ง',
-      'โปรแกรมให้ความรู้เรื่องสุขภาพสตรีและการดูแลตนเองในที่ทำงาน',
-      'ออกแบบตารางกะให้เหมาะสมกับพนักงานหญิงที่มีภาระครอบครัว',
-    ].filter(Boolean).slice(0,4)});
+  if(fPct>=60||hasPrd){
+    cats.push({icon:'💜',title:'สุขภาพพนักงานหญิง',activities:[hasPrd?'จัดพื้นที่พักสำหรับพนักงานที่ปวดประจำเดือน พร้อมยาสามัญ':'ตรวจสุขภาพเชิงป้องกัน (Pap Smear, Mammogram) ฟรีปีละครั้ง','โปรแกรมให้ความรู้เรื่องสุขภาพสตรีและการดูแลตนเอง','ออกแบบตารางกะให้เหมาะสมกับพนักงานหญิงที่มีภาระครอบครัว'].slice(0,4)});
   }
-
-  return { summary, categories: cats.slice(0,5) };
+  return{summary:sum,categories:cats.slice(0,5)};
 }
-
-function renderAIResult(data){
-  const result = document.getElementById('ai-result');
-  const filterLabel = FILTER==='all'?'ทุกช่วง':
-    FILTER==='1m'?'เดือนล่าสุด':FILTER==='3m'?'3 เดือนล่าสุด':
-    FILTER==='6m'?'6 เดือนล่าสุด':FILTER==='12m'?'12 เดือนล่าสุด':FILTER;
-  const cats=(data.categories||[]).map((c,i)=><li>${a}</li>).join('');
-  result.innerHTML = ;
-}
-
-// sync mobile bottom bar with main filter
-function setFM(val,el){
-  FILTER=val;
-  document.querySelectorAll('.pbtn,.mbtn').forEach(b=>b.classList.remove('on'));
-  document.querySelectorAll('.pbtn').forEach(b=>{
-    if((b.getAttribute('onclick')||'').includes("'"+val+"'")) b.classList.add('on');
-  });
-  el.classList.add('on');
-  render(getData());
+function renderAI(data){
+  const el=document.getElementById('ai-result');
+  const fl=FILTER==='all'?'ทุกช่วง':FILTER==='1m'?'เดือนล่าสุด':FILTER==='3m'?'3 เดือนล่าสุด':FILTER==='6m'?'6 เดือนล่าสุด':FILTER==='12m'?'12 เดือนล่าสุด':FILTER;
+  const cards=(data.categories||[]).map((c,i)=>'<div class="aicard" style="animation-delay:'+(0.05+i*0.08)+'s"><div class="aicard-h"><span class="aicard-ico">'+(c.icon||'💡')+'</span><span class="aicard-t">'+(c.title||'')+'</span></div><div class="aicard-body"><ul>'+(c.activities||[]).map(a=>'<li>'+a+'</li>').join('')+'</ul></div></div>').join('');
+  el.innerHTML='<div class="ai-sum">📊 <strong style="color:var(--purple)">ผลวิเคราะห์ช่วง'+fl+':</strong><br>'+(data.summary||'')+'</div><div class="ai-cards">'+cards+'</div><button class="ai-rerun" onclick="runAI()" style="margin-top:14px">🔄 วิเคราะห์ใหม่</button>';
 }
 
 window.addEventListener('load',loadData);
