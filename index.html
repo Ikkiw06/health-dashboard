@@ -152,6 +152,19 @@ main{max-width:1440px;margin:0 auto;padding:22px 22px 44px}
 }
 .mbtn.on{background:var(--golddim);color:var(--gold);border-color:var(--gold)}
 .mbtn.dim{opacity:.28;cursor:default}
+.abtn{
+  border:1px solid rgba(24,195,173,.25);background:var(--card2);color:var(--txt2);
+  padding:5px 14px;border-radius:7px;cursor:pointer;
+  font-size:12px;font-weight:600;transition:all .17s;white-space:nowrap;
+  backdrop-filter:blur(6px);
+}
+.abtn:hover{border-color:var(--teal);color:var(--teal);background:rgba(24,195,173,.1)}
+.abtn.on{
+  background:linear-gradient(135deg,#0a7060,var(--teal));
+  color:#fff;border-color:transparent;
+  box-shadow:0 3px 14px rgba(24,195,173,.35);transform:translateY(-1px);
+  font-weight:700;
+}
 
 /* ══════════════════════════════════════
    KPI GRID
@@ -398,8 +411,8 @@ footer{text-align:center;padding:14px 0 0;font-size:11px;color:var(--muted);bord
   .frow::-webkit-scrollbar{display:none}
   .frow+.frow{margin-top:8px;padding-top:8px}
   .flbl{display:none}
-  .pbtn,.mbtn{flex-shrink:0;padding:7px 14px;font-size:12px;border-radius:8px}
-  .pbtn.on{padding:7px 14px}
+  .pbtn,.mbtn,.abtn{flex-shrink:0;padding:7px 14px;font-size:12px;border-radius:8px}
+  .pbtn.on,.abtn.on{padding:7px 14px}
 
   /* KPI: 2 cols */
   .kgrid{grid-template-columns:repeat(2,1fr);gap:9px}
@@ -502,6 +515,14 @@ footer{text-align:center;padding:14px 0 0;font-size:11px;color:var(--muted);bord
       <button class="pbtn"    onclick="setF('3m',this)">3 เดือนที่ผ่านมา</button>
       <button class="pbtn"    onclick="setF('6m',this)">6 เดือนที่ผ่านมา</button>
       <button class="pbtn"    onclick="setF('12m',this)">12 เดือนที่ผ่านมา</button>
+    </div>
+  </div>
+  <div class="frow">
+    <div class="flbl">📍 พื้นที่</div>
+    <div class="fbtns">
+      <button class="abtn on" onclick="setArea('all',this)">ทั้งหมด</button>
+      <button class="abtn"    onclick="setArea('บางบ่อ',this)">📍 บางบ่อ</button>
+      <button class="abtn"    onclick="setArea('คลองเจ้า',this)">📍 คลองเจ้า</button>
     </div>
   </div>
   <div class="frow">
@@ -652,7 +673,7 @@ const CSV_URL  = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/pub?output=
 const TH_MO    = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
 const TH_SH    = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
 
-let FILTER='all', mChart=null, dChart=null, isDark=true, SRC='embedded';
+let FILTER='all', AREA='all', mChart=null, dChart=null, isDark=true, SRC='embedded';
 
 /* ══════════════════════════════════════
    THEME
@@ -688,13 +709,34 @@ function aggMonths(months){
   for(const d of ds) for(const[k,v]of Object.entries(d.gender)) gender[k]=(gender[k]||0)+v;
   return{total,uniq,sym:mg('sym'),med:mg('med'),grp:mg('grp'),time:mg('time'),gender,area:mg('area')};
 }
+function applyArea(d){
+  if(!d||AREA==='all') return d;
+  const aEntry=(d.area||[]).find(([n])=>n===AREA);
+  if(!aEntry) return null;
+  const aTotal=aEntry[1];
+  const ratio=d.total?aTotal/d.total:0;
+  const sc=arr=>arr.map(([k,v])=>[k,Math.max(1,Math.round(v*ratio))]);
+  const F=d.gender['F']||0,M=d.gender['M']||0;
+  return{...d,total:aTotal,uniq:Math.round(d.uniq*ratio),
+    sym:sc(d.sym),med:sc(d.med),grp:sc(d.grp),time:sc(d.time),
+    gender:{F:Math.round(F*ratio),M:Math.round(M*ratio)},
+    area:[[AREA,aTotal]]};
+}
 function getData(){
-  if(FILTER==='all') return RD['__all__'];
-  if(FILTER==='1m')  return aggMonths(lastN(1));
-  if(FILTER==='3m')  return aggMonths(lastN(3));
-  if(FILTER==='6m')  return aggMonths(lastN(6));
-  if(FILTER==='12m') return aggMonths(lastN(12));
-  return RD[FILTER]||null;
+  let d;
+  if(FILTER==='all') d=RD['__all__'];
+  else if(FILTER==='1m')  d=aggMonths(lastN(1));
+  else if(FILTER==='3m')  d=aggMonths(lastN(3));
+  else if(FILTER==='6m')  d=aggMonths(lastN(6));
+  else if(FILTER==='12m') d=aggMonths(lastN(12));
+  else d=RD[FILTER]||null;
+  return applyArea(d);
+}
+function setArea(val,el){
+  AREA=val;
+  document.querySelectorAll('.abtn').forEach(b=>b.classList.remove('on'));
+  el.classList.add('on');
+  render(getData());
 }
 function getBarData(){
   // Monthly totals for bar chart
@@ -1061,37 +1103,16 @@ function renderAIResult(data){
   const filterLabel = FILTER==='all'?'ทุกช่วง':
     FILTER==='1m'?'เดือนล่าสุด':FILTER==='3m'?'3 เดือนล่าสุด':
     FILTER==='6m'?'6 เดือนล่าสุด':FILTER==='12m'?'12 เดือนล่าสุด':FILTER;
-
-  const cats = (data.categories||[]).map((c,i)=>`
-    <div class="ai-card" style="animation-delay:${.05+i*.08}s">
-      <div class="ai-card-h">
-        <span class="ai-card-ico">${c.icon||'💡'}</span>
-        <span class="ai-card-t">${c.title||''}</span>
-      </div>
-      <div class="ai-card-body">
-        <ul>${(c.activities||[]).map(a=>`<li>${a}</li>`).join('')}</ul>
-      </div>
-    </div>`).join('');
-
-  result.innerHTML = `
-    <div style="margin:14px 0 12px;padding:12px 16px;
-      background:rgba(176,111,255,.09);border-radius:10px;
-      border:1px solid rgba(176,111,255,.2);
-      font-size:12px;color:var(--txt2);line-height:1.7;transition:color .4s">
-      📊 <strong style="color:var(--purple)">ผลวิเคราะห์ช่วง${filterLabel}:</strong><br>${data.summary||''}
-    </div>
-    <div class="ai-cards">${cats}</div>
-    <button class="ai-rerun" onclick="runAI()" style="margin-top:14px">🔄 วิเคราะห์ใหม่</button>`;
+  const cats=(data.categories||[]).map((c,i)=><li>${a}</li>).join('');
+  result.innerHTML = ;
 }
 
 // sync mobile bottom bar with main filter
 function setFM(val,el){
   FILTER=val;
   document.querySelectorAll('.pbtn,.mbtn').forEach(b=>b.classList.remove('on'));
-  // activate in both bars
   document.querySelectorAll('.pbtn').forEach(b=>{
-    if((b.getAttribute('onclick')||'').includes("'"+val+"'")||
-       (b.getAttribute('onclick')||'').includes('"'+val+'"')) b.classList.add('on');
+    if((b.getAttribute('onclick')||'').includes("'"+val+"'")) b.classList.add('on');
   });
   el.classList.add('on');
   render(getData());
