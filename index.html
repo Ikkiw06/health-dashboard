@@ -175,7 +175,11 @@ footer{text-align:center;padding:14px 0;font-size:11px;color:var(--muted);border
   .tvgrid{grid-template-columns:repeat(2,1fr)}.tvcard{padding:14px}
   .aibox{padding:14px}.ai-cards{grid-template-columns:1fr}
   .mbar{display:flex;position:fixed;bottom:0;left:0;right:0;z-index:150;background:var(--card);border-top:1px solid var(--bdr2);backdrop-filter:blur(16px);padding:8px 10px 12px;gap:6px;overflow-x:auto;-webkit-overflow-scrolling:touch;box-shadow:0 -4px 20px rgba(0,0,0,.3);scrollbar-width:none}
-  .mbar::-webkit-scrollbar{display:none}.mbar .pbtn{flex-shrink:0;padding:8px 14px;font-size:12px}
+  .mbar::-webkit-scrollbar{display:none}
+.tv-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.tv-tab{border:1px solid var(--bdr2);background:var(--card2);color:var(--txt2);padding:5px 13px;border-radius:7px;cursor:pointer;font-size:12px;font-weight:600;transition:all .17s;white-space:nowrap;font-family:inherit}
+.tv-tab:hover{border-color:var(--gold);color:var(--gold);background:var(--gdim)}
+.tv-tab.on{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#0a0a0a;border-color:transparent;box-shadow:0 3px 14px rgba(200,168,69,.4);font-weight:700}.mbar .pbtn{flex-shrink:0;padding:8px 14px;font-size:12px}
 }
 @media(max-width:400px){.kgrid{grid-template-columns:1fr}.kv{font-size:20px}.tvgrid{grid-template-columns:1fr}}
 </style>
@@ -251,6 +255,7 @@ footer{text-align:center;padding:14px 0;font-size:11px;color:var(--muted);border
     <div class="tvhl"><div class="tvi2">🏅</div><div><div class="tvt" id="tvtitle">Top 5 ผู้ใช้บริการบ่อยที่สุด</div><div class="tvs" id="tvsub">กรุณาเชื่อมต่อ Google Sheets เพื่อดูรายชื่อพนักงาน</div></div></div>
     <span class="tvnote"><span class="tvsrc emb" id="tvsrc">ข้อมูลฝัง</span></span>
   </div>
+  <div class="tv-tabs" id="tv-tabs"></div>
   <div class="tvgrid" id="tvgrid"></div>
 </div>
 <div class="shdr" style="animation-delay:.25s"><h2>🤖 AI แนะนำกิจกรรม</h2><div class="shdr-line"></div></div>
@@ -282,7 +287,7 @@ const EMBEDDED_TOP5=[
   {id:'5078',name:'ธวัชชัย สาเกตุ',gender:'M',visits:20,area:'บางบ่อ',dept:'Distribution Center (LTPF/Local Food)'},
 ];
 const CSV='https://docs.google.com/spreadsheets/d/1Apibk0d_e3hbNuy7XvA4EBBKnMuM7xl-wfR26VB4fu8/pub?output=csv';
-let FILTER='all',AREA='all',mCh=null,dCh=null,isDark=true,SRC='embedded',TOP_VIS=[];
+let FILTER='all',AREA='all',mCh=null,dCh=null,isDark=true,SRC='embedded',TOP_VIS=[],TOP_VIS_BY_AREA={},ACTIVE_TV_AREA='all';
 function toggleTheme(){isDark=!isDark;document.documentElement.dataset.theme=isDark?'dark':'light';document.getElementById('thico').textContent=isDark?'☀️':'🌙';document.getElementById('thlbl').textContent=isDark?'สว่าง':'มืด';const d=getData();if(d)render(d);}
 function lastN(n){const now=new Date(),r=[];for(let i=n-1;i>=0;i--){const d=new Date(now.getFullYear(),now.getMonth()-i,1);r.push(TH_MO[d.getMonth()]);}return r;}
 function aggMo(months){const ds=months.map(m=>RD[m]).filter(Boolean);if(!ds.length)return null;if(ds.length===1)return ds[0];const total=ds.reduce((s,d)=>s+d.total,0);const uniq=Math.round(ds.reduce((s,d)=>s+d.uniq,0)*0.82);function mg(k){const c={};for(const d of ds)for(const[kk,v]of d[k])c[kk]=(c[kk]||0)+v;return Object.entries(c).sort((a,b)=>b[1]-a[1]).map(([kk,v])=>[kk,v]);}const gender={};for(const d of ds)for(const[k,v]of Object.entries(d.gender))gender[k]=(gender[k]||0)+v;return{total,uniq,sym:mg('sym'),med:mg('med'),grp:mg('grp'),time:mg('time'),gender,area:mg('area')};}
@@ -302,24 +307,23 @@ function gc(){return isDark?{grid:'rgba(255,255,255,.05)',tick:'#4a6070',leg:'#7
 function renderBar(labels,data){const ctx=document.getElementById('cbar');if(!ctx||typeof Chart==='undefined')return;if(mCh)mCh.destroy();const c=gc(),mx=data.length?data.indexOf(Math.max(...data)):0;mCh=new Chart(ctx,{type:'bar',data:{labels,datasets:[{label:'ครั้ง',data,backgroundColor:data.map((_,i)=>i===mx?'rgba(200,168,69,.85)':'rgba(79,142,247,.4)'),borderColor:data.map((_,i)=>i===mx?'#c8a845':'#4f8ef7'),borderWidth:1.5,borderRadius:7,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,animation:{duration:900,easing:'easeOutQuart'},plugins:{legend:{display:false},tooltip:{backgroundColor:c.bg,titleColor:c.tc,bodyColor:c.bc,borderColor:'rgba(200,168,69,.3)',borderWidth:1,padding:10,cornerRadius:8}},scales:{x:{grid:{color:c.grid},ticks:{color:c.tick,font:{size:12,weight:'600'}}},y:{grid:{color:c.grid},ticks:{color:c.tick,font:{size:11}}}}}});}
 function renderDonut(labels,data){const ctx=document.getElementById('cdonut');if(!ctx||typeof Chart==='undefined')return;if(dCh)dCh.destroy();const c=gc(),cols=['#c8a845','#4f8ef7','#18c3ad','#b06fff','#ff8c40'];dCh=new Chart(ctx,{type:'doughnut',data:{labels,datasets:[{data,backgroundColor:cols.map(x=>x+'cc'),borderColor:cols,borderWidth:2,hoverOffset:10}]},options:{responsive:true,maintainAspectRatio:false,animation:{duration:900,easing:'easeOutQuart'},cutout:'64%',plugins:{legend:{position:'bottom',labels:{color:c.leg,font:{size:10,weight:'600'},padding:10,boxWidth:10,usePointStyle:true,pointStyle:'circle'}},tooltip:{backgroundColor:c.bg,titleColor:c.tc,bodyColor:c.bc,borderColor:'rgba(200,168,69,.3)',borderWidth:1,padding:10,cornerRadius:8}}}});}
 function setStatus(s,t){document.getElementById('dot').className='dot '+s;$t('stxt',t);}
+function getEmbeddedByArea(){const b={};for(const p of EMBEDDED_TOP5){if(!b[p.area])b[p.area]=[];b[p.area].push(p);}return b;}
+function setTVArea(area){ACTIVE_TV_AREA=area;renderTopVis();}
 function renderTopVis(){
-  const grid=document.getElementById('tvgrid'),src=document.getElementById('tvsrc'),tt=document.getElementById('tvtitle'),ts=document.getElementById('tvsub');
+  const grid=document.getElementById('tvgrid'),src=document.getElementById('tvsrc'),tt=document.getElementById('tvtitle'),ts=document.getElementById('tvsub'),tabsEl=document.getElementById('tv-tabs');
   if(!grid)return;
-  const ava=['tvava1','tvava2','tvava3','tvava4','tvava5'],rc=['tvr1','tvr2','tvr3','tvr4','tvr5'],md=['🥇','🥈','🥉','4','5'];
-  if(TOP_VIS&&TOP_VIS.length>0){
-    if(src){src.textContent='Google Sheets สด ✓';src.className='tvsrc live';}
-    if(tt)tt.textContent='รายชื่อพนักงานที่มาใช้บริการมากที่สุด';
-    if(ts)ts.textContent='Top Frequent Visitors — ม.ค.–มิ.ย. 2568';
-    const mx=TOP_VIS[0].visits;
-    grid.innerHTML=TOP_VIS.map((p,i)=>{const emo=p.gender==='F'?'👩':'👨';const gb=p.gender==='F'?'<span class="tvbdg tvbdg-f">👩 หญิง</span>':'<span class="tvbdg tvbdg-m">👨 ชาย</span>';const ab=p.area?'<span class="tvbdg tvbdg-n">📍'+p.area+'</span>':'';const dn=p.name&&p.name!==p.id?p.name:p.id;return '<div class="tvitem" style="animation-delay:'+(0.06+i*0.09)+'s"><div class="tvrank '+rc[i]+'">'+md[i]+'</div><div class="tvava '+ava[i]+'">'+emo+'</div><div class="tvname" title="'+dn+'">'+dn+'</div>'+(p.name&&p.name!==p.id?'<div class="tvid">'+p.id+'</div>':'<div class="tvid">&nbsp;</div>')+'<div class="tvcnt">'+p.visits+'</div><div class="tvunit">ครั้ง</div><div class="tvbadges">'+gb+ab+'</div><div class="tvbar"><div class="tvfill" data-w="'+(p.visits/mx*100).toFixed(1)+'"></div></div></div>';}).join('');
-  } else {
-    const data=EMBEDDED_TOP5;
-    if(src){src.textContent='ข้อมูลจริง ม.ค.–มิ.ย. 2568';src.className='tvsrc emb';}
-    if(tt)tt.textContent='รายชื่อพนักงานที่มาใช้บริการมากที่สุด';
-    if(ts)ts.textContent='Top Frequent Visitors — ม.ค.–มิ.ย. 2568';
-    const mx=data[0].visits;
-    grid.innerHTML=data.map((p,i)=>{const emo=p.gender==='F'?'👩':'👨';const gb=p.gender==='F'?'<span class="tvbdg tvbdg-f">👩 หญิง</span>':'<span class="tvbdg tvbdg-m">👨 ชาย</span>';const ab=p.area?'<span class="tvbdg tvbdg-n">📍'+p.area+'</span>':'';return '<div class="tvitem" style="animation-delay:'+(0.06+i*0.09)+'s"><div class="tvrank '+rc[i]+'">'+md[i]+'</div><div class="tvava '+ava[i]+'">'+emo+'</div><div class="tvname" title="'+p.name+'">'+p.name+'</div><div class="tvid">'+p.id+'</div><div class="tvcnt">'+p.visits+'</div><div class="tvunit">ครั้ง</div><div class="tvbadges">'+gb+ab+'</div><div class="tvbar"><div class="tvfill" data-w="'+(p.visits/mx*100).toFixed(1)+'"></div></div></div>';}).join('');
-  }
+  const ava=['tvava1','tvava2','tvava3','tvava4','tvava5'],rc=['tvr1','tvr2','tvr3','tvr4','tvr5'],md=['\U0001f947','\U0001f948','\U0001f949','4','5'];
+  const isLive=TOP_VIS&&TOP_VIS.length>0;
+  if(src){src.textContent=isLive?'Google Sheets ✓':'ข้อมูลจริง ม.ค.–มิ.ย. 2568';src.className='tvsrc '+(isLive?'live':'emb');}
+  if(tt)tt.textContent='รายชื่อพนักงานที่มาใช้บริการมากที่สุด';
+  if(ts)ts.textContent='แยกตามพื้นที่ — ม.ค.–มิ.ย. 2568';
+  const byArea=isLive?TOP_VIS_BY_AREA:getEmbeddedByArea();
+  const areas=['all',...Object.keys(byArea).sort()];
+  if(tabsEl)tabsEl.innerHTML=areas.map(a=>'<button class="tv-tab'+(a===ACTIVE_TV_AREA?' on':'')+'" onclick="setTVArea(\''+a+'\')">'+(a==='all'?'\U0001f3c6 รวมทั้งหมด':'\U0001f4cd '+a)+'</button>').join('');
+  const list=ACTIVE_TV_AREA==='all'?(isLive?TOP_VIS:EMBEDDED_TOP5):(byArea[ACTIVE_TV_AREA]||[]);
+  if(!list.length){grid.innerHTML='<div style="color:var(--muted);font-size:12px;text-align:center;padding:22px 0;grid-column:1/-1">ไม่มีข้อมูลพื้นที่นี้</div>';return;}
+  const mx=list[0].visits;
+  grid.innerHTML=list.map((p,i)=>{const emo=p.gender==='F'?'\U0001f469':'\U0001f468';const gb=p.gender==='F'?'<span class="tvbdg tvbdg-f">\U0001f469 หญิง</span>':'<span class="tvbdg tvbdg-m">\U0001f468 ชาย</span>';const ab=p.area?'<span class="tvbdg tvbdg-n">\U0001f4cd'+p.area+'</span>':'';const dn=p.name&&p.name!==p.id?p.name:p.id;return '<div class="tvitem" style="animation-delay:'+(0.06+i*0.09)+'s"><div class="tvrank '+rc[i]+'">'+md[i]+'</div><div class="tvava '+ava[i]+'">'+emo+'</div><div class="tvname" title="'+dn+'">'+dn+'</div>'+(p.name&&p.name!==p.id?'<div class="tvid">'+p.id+'</div>':'<div class="tvid">&nbsp;</div>')+'<div class="tvcnt">'+p.visits+'</div><div class="tvunit">ครั้ง</div><div class="tvbadges">'+gb+ab+'</div><div class="tvbar"><div class="tvfill" data-w="'+(p.visits/mx*100).toFixed(1)+'"></div></div></div>';}).join('');
   requestAnimationFrame(()=>requestAnimationFrame(()=>{grid.querySelectorAll('.tvfill').forEach(b=>{b.style.width=b.dataset.w+'%';});}));
 }
 async function loadData(){
@@ -348,6 +352,7 @@ function parseCSV(text){
     if(id){const name=(c[2]||'').trim()||id;const g2=g==='M'?'M':'F';if(!byP[id])byP[id]={id,name,visits:0,gender:g2,areas:{}};byP[id].visits++;byP[id].areas[area]=(byP[id].areas[area]||0)+1;}
   }
   TOP_VIS=Object.values(byP).sort((a,b)=>b.visits-a.visits).slice(0,5).map(p=>{const ta=Object.entries(p.areas).sort((a,b)=>b[1]-a[1])[0];return{...p,area:ta?ta[0]:''};});
+  TOP_VIS_BY_AREA={};const _av={};for(const p of Object.values(byP)){for(const[ar,cnt]of Object.entries(p.areas)){if(!_av[ar])_av[ar]={};_av[ar][p.id]={id:p.id,name:p.name,gender:p.gender,visits:cnt,area:ar};}}for(const[ar,pp]of Object.entries(_av)){TOP_VIS_BY_AREA[ar]=Object.values(pp).sort((a,b)=>b.visits-a.visits).slice(0,5);}
   const months=Object.keys(byMo);
   for(const m of months){const d=byMo[m];const s2a=(o,n=10)=>Object.entries(o).sort((a,b)=>b[1]-a[1]).slice(0,n).map(([k,v])=>[k,v]);RD[m]={total:d.total,uniq:d.uniq.size,sym:s2a(d.sym),med:s2a(d.med),grp:s2a(d.grp),time:s2a(d.time,4),gender:d.gender,area:s2a(d.area,5)};}
   const all=aggMo(months);if(all)RD['__all__']={...all};
