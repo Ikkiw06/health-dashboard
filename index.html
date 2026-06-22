@@ -155,6 +155,10 @@ main{max-width:1440px;margin:0 auto;padding:22px 22px 120px}
 .src-badge{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:99px;font-size:11px;font-weight:600;background:rgba(48,217,136,.1);border:1px solid rgba(48,217,136,.3);color:#30d988}
 footer{text-align:center;padding:14px 0;font-size:11px;color:var(--muted);border-top:1px solid var(--bdr);transition:color .4s,border-color .4s}
 .mbar{display:none}
+.tv-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;padding:4px 0}
+.tv-tab{border:1px solid var(--bdr2);background:var(--card2);color:var(--txt2);padding:6px 16px;border-radius:20px;cursor:pointer;font-size:12px;font-weight:600;transition:all .2s;white-space:nowrap;font-family:inherit;letter-spacing:.3px}
+.tv-tab:hover{border-color:var(--gold);color:var(--gold);background:var(--gdim);transform:translateY(-1px)}
+.tv-tab.on{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#0a0a0a;border-color:transparent;box-shadow:0 4px 16px rgba(200,168,69,.5);font-weight:700;transform:translateY(-1px)}
 @media(max-width:1200px){.t5g{grid-template-columns:repeat(2,1fr)}.chrow{grid-template-columns:1fr}.kgrid{grid-template-columns:repeat(3,1fr)}}
 @media(max-width:900px){.brow{grid-template-columns:repeat(2,1fr)}.tvgrid{grid-template-columns:repeat(3,1fr)}}
 @media(max-width:768px){
@@ -175,11 +179,7 @@ footer{text-align:center;padding:14px 0;font-size:11px;color:var(--muted);border
   .tvgrid{grid-template-columns:repeat(2,1fr)}.tvcard{padding:14px}
   .aibox{padding:14px}.ai-cards{grid-template-columns:1fr}
   .mbar{display:flex;position:fixed;bottom:0;left:0;right:0;z-index:150;background:var(--card);border-top:1px solid var(--bdr2);backdrop-filter:blur(16px);padding:8px 10px 12px;gap:6px;overflow-x:auto;-webkit-overflow-scrolling:touch;box-shadow:0 -4px 20px rgba(0,0,0,.3);scrollbar-width:none}
-  .mbar::-webkit-scrollbar{display:none}
-.tv-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
-.tv-tab{border:1px solid var(--bdr2);background:var(--card2);color:var(--txt2);padding:5px 13px;border-radius:7px;cursor:pointer;font-size:12px;font-weight:600;transition:all .17s;white-space:nowrap;font-family:inherit}
-.tv-tab:hover{border-color:var(--gold);color:var(--gold);background:var(--gdim)}
-.tv-tab.on{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#0a0a0a;border-color:transparent;box-shadow:0 3px 14px rgba(200,168,69,.4);font-weight:700}.mbar .pbtn{flex-shrink:0;padding:8px 14px;font-size:12px}
+  .mbar::-webkit-scrollbar{display:none}.mbar .pbtn{flex-shrink:0;padding:8px 14px;font-size:12px}
 }
 @media(max-width:400px){.kgrid{grid-template-columns:1fr}.kv{font-size:20px}.tvgrid{grid-template-columns:1fr}}
 </style>
@@ -312,18 +312,18 @@ function setTVArea(area){ACTIVE_TV_AREA=area;renderTopVis();}
 function renderTopVis(){
   const grid=document.getElementById('tvgrid'),src=document.getElementById('tvsrc'),tt=document.getElementById('tvtitle'),ts=document.getElementById('tvsub'),tabsEl=document.getElementById('tv-tabs');
   if(!grid)return;
-  const ava=['tvava1','tvava2','tvava3','tvava4','tvava5'],rc=['tvr1','tvr2','tvr3','tvr4','tvr5'],md=['\U0001f947','\U0001f948','\U0001f949','4','5'];
+  const ava=['tvava1','tvava2','tvava3','tvava4','tvava5'],rc=['tvr1','tvr2','tvr3','tvr4','tvr5'],md=['🥇','🥈','🥉','4','5'];
   const isLive=TOP_VIS&&TOP_VIS.length>0;
   if(src){src.textContent=isLive?'Google Sheets ✓':'ข้อมูลจริง ม.ค.–มิ.ย. 2568';src.className='tvsrc '+(isLive?'live':'emb');}
   if(tt)tt.textContent='รายชื่อพนักงานที่มาใช้บริการมากที่สุด';
   if(ts)ts.textContent='แยกตามพื้นที่ — ม.ค.–มิ.ย. 2568';
   const byArea=isLive?TOP_VIS_BY_AREA:getEmbeddedByArea();
   const areas=['all',...Object.keys(byArea).sort()];
-  if(tabsEl)tabsEl.innerHTML=areas.map(a=>'<button class="tv-tab'+(a===ACTIVE_TV_AREA?' on':'')+'" onclick="setTVArea(\''+a+'\')">'+(a==='all'?'\U0001f3c6 รวมทั้งหมด':'\U0001f4cd '+a)+'</button>').join('');
+  if(tabsEl)tabsEl.innerHTML=areas.map(a=>'<button class="tv-tab'+(a===ACTIVE_TV_AREA?' on':'')+'" onclick="setTVArea(\''+a+'\')">'+(a==='all'?'🏆 รวมทั้งหมด':'📍 '+a)+'</button>').join('');
   const list=ACTIVE_TV_AREA==='all'?(isLive?TOP_VIS:EMBEDDED_TOP5):(byArea[ACTIVE_TV_AREA]||[]);
   if(!list.length){grid.innerHTML='<div style="color:var(--muted);font-size:12px;text-align:center;padding:22px 0;grid-column:1/-1">ไม่มีข้อมูลพื้นที่นี้</div>';return;}
   const mx=list[0].visits;
-  grid.innerHTML=list.map((p,i)=>{const emo=p.gender==='F'?'\U0001f469':'\U0001f468';const gb=p.gender==='F'?'<span class="tvbdg tvbdg-f">\U0001f469 หญิง</span>':'<span class="tvbdg tvbdg-m">\U0001f468 ชาย</span>';const ab=p.area?'<span class="tvbdg tvbdg-n">\U0001f4cd'+p.area+'</span>':'';const dn=p.name&&p.name!==p.id?p.name:p.id;return '<div class="tvitem" style="animation-delay:'+(0.06+i*0.09)+'s"><div class="tvrank '+rc[i]+'">'+md[i]+'</div><div class="tvava '+ava[i]+'">'+emo+'</div><div class="tvname" title="'+dn+'">'+dn+'</div>'+(p.name&&p.name!==p.id?'<div class="tvid">'+p.id+'</div>':'<div class="tvid">&nbsp;</div>')+'<div class="tvcnt">'+p.visits+'</div><div class="tvunit">ครั้ง</div><div class="tvbadges">'+gb+ab+'</div><div class="tvbar"><div class="tvfill" data-w="'+(p.visits/mx*100).toFixed(1)+'"></div></div></div>';}).join('');
+  grid.innerHTML=list.map((p,i)=>{const emo=p.gender==='F'?'👩':'👨';const gb=p.gender==='F'?'<span class="tvbdg tvbdg-f">👩 หญิง</span>':'<span class="tvbdg tvbdg-m">👨 ชาย</span>';const ab=p.area?'<span class="tvbdg tvbdg-n">📍'+p.area+'</span>':'';const dn=p.name&&p.name!==p.id?p.name:p.id;return '<div class="tvitem" style="animation-delay:'+(0.06+i*0.09)+'s"><div class="tvrank '+rc[i]+'">'+md[i]+'</div><div class="tvava '+ava[i]+'">'+emo+'</div><div class="tvname" title="'+dn+'">'+dn+'</div>'+(p.name&&p.name!==p.id?'<div class="tvid">'+p.id+'</div>':'<div class="tvid">&nbsp;</div>')+'<div class="tvcnt">'+p.visits+'</div><div class="tvunit">ครั้ง</div><div class="tvbadges">'+gb+ab+'</div><div class="tvbar"><div class="tvfill" data-w="'+(p.visits/mx*100).toFixed(1)+'"></div></div></div>';}).join('');
   requestAnimationFrame(()=>requestAnimationFrame(()=>{grid.querySelectorAll('.tvfill').forEach(b=>{b.style.width=b.dataset.w+'%';});}));
 }
 async function loadData(){
